@@ -6,31 +6,36 @@ public abstract class LivingCreature : MonoBehaviour
 {
     [System.Serializable]
     public class Statistics
-    {
-        public int curHealth;
+    {        
         public int maxHealth;
-
-        public int regenHealthAmount;
-        public float regenHealthRate;
-        public float regenHealthTime = 0;
-
-        public float curStamina;
         public float maxStamina;
 
+        public int regenHealthAmount;
+        public float regenHealthRate;     
+
         public float regenStaminaAmount;
-        public float regenStaminaRate;
-        public float regenStaminaTime = 0;
+        public float regenStaminaRate;        
         public float regenStaminaDelay;
+        
+        public float maxPoise;
 
         public bool stunned;
         public bool animationBusy; // for animations
         public bool alive;
         public bool invincible;
 
+        [Header("'Dont change' stats")]
+        public int curHealth;
+        public float curStamina;
+        public float regenHealthTime = 0;
+        public float regenStaminaTime = 0;
+        public float poise;
+
         public void Initialize()
         {
             curHealth = maxHealth;
             curStamina = maxStamina;
+            poise = maxPoise;
             stunned = false;
             alive = true;
         }
@@ -97,28 +102,31 @@ public abstract class LivingCreature : MonoBehaviour
             return;
     }
 
-    public virtual void Damage(int damageTaken, bool stun)
+    public virtual void Damage(int damageTaken, bool stun, int poiseDamage)
     {
         if (stats.invincible)
             return;
 
         stats.curHealth -= damageTaken;
+        stats.poise -= poiseDamage;
     }
 
-    public IEnumerator DamageOverTime(int ticks, int damagePerTick, float damageInterval, bool _stun)
+    public IEnumerator DamageOverTime(int ticks, int damagePerTick, float damageInterval, bool _stun, int poiseDamage)
     {
-        Damage(damagePerTick, _stun);
+        Damage(damagePerTick, _stun, poiseDamage);
 
         yield return new WaitForSeconds(damageInterval);
 
         if (ticks > 1)
-            StartCoroutine(DamageOverTime(ticks - 1, damagePerTick, damageInterval, _stun));
+            StartCoroutine(DamageOverTime(ticks - 1, damagePerTick, damageInterval, _stun, poiseDamage));
     }
 
     public virtual void Kill()
     {
         stats.alive = false;
     }
+
+    #region Animation events
 
     protected void AnimationStunnedEnd()
     {
@@ -129,4 +137,6 @@ public abstract class LivingCreature : MonoBehaviour
     {
         stats.animationBusy = false;
     }
+
+    #endregion
 }

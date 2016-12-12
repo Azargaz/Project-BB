@@ -5,6 +5,7 @@ using UnityEngine;
 public class DamagePlayer : MonoBehaviour
 {
     public int damage;
+    public int poiseDmg;
     public int ticksOfDamage = 0;
     public float damageInterval;
     public bool stunPlayer;
@@ -16,9 +17,9 @@ public class DamagePlayer : MonoBehaviour
             PlayerCreature player = other.GetComponent<PlayerCreature>();
 
             if (ticksOfDamage > 0)
-                StartCoroutine(player.DamageOverTime(ticksOfDamage, damage, damageInterval, stunPlayer));
+                StartCoroutine(player.DamageOverTime(ticksOfDamage, damage, damageInterval, stunPlayer, poiseDmg));
             else
-                player.Damage(damage, stunPlayer);
+                player.Damage(damage, stunPlayer, poiseDmg);
         }
     }
 }

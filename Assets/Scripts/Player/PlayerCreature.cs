@@ -36,16 +36,17 @@ public class PlayerCreature : LivingCreature
         }
     }
 
-    public override void Damage(int damageTaken, bool stun)
+    public override void Damage(int damageTaken, bool stun, int poiseDamage)
     {
-        base.Damage(damageTaken, stun);
+        base.Damage(damageTaken, stun, poiseDamage);
 
-        if(!stats.stunned && stun)
+        if(!stats.stunned && stun && stats.poise <= 0)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");
 
             stats.stunned = true;
+            stats.poise = stats.maxPoise;
         }
     }
 
@@ -53,13 +54,15 @@ public class PlayerCreature : LivingCreature
     {
         base.Kill();
         Debug.LogError("YOU DIED");
-        Invoke("RestartGame", 1f);
+        GameManager.instance.GameOver();
     }
 
     void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    #region Animation events
 
     void AnimationInvincibility()
     {
@@ -87,8 +90,5 @@ public class PlayerCreature : LivingCreature
         stats.DelayStaminaRegen();
     }
 
-    void OnTriggerStay2D(Collider2D other)
-    {
-
-    }
+    #endregion
 }

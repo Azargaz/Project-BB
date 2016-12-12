@@ -6,6 +6,8 @@ public class EnemyCreature : LivingCreature
 {
     [SerializeField]
     GameObject hitParticles;
+    [SerializeField]
+    GameObject deathParticles;
     Animator anim;
 
     void Awake()
@@ -20,16 +22,17 @@ public class EnemyCreature : LivingCreature
         base.Update();
     }
 
-    public override void Damage(int damageTaken, bool stun)
+    public override void Damage(int damageTaken, bool stun, int poiseDamage)
     {
-        base.Damage(damageTaken, stun);
+        base.Damage(damageTaken, stun, poiseDamage);
 
-        if (!stats.stunned && stun)
+        if (!stats.stunned && stun && stats.poise <= 0)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");            
 
             stats.stunned = true;
+            stats.poise = stats.maxPoise;
         }
 
         if (hitParticles != null)
@@ -43,11 +46,13 @@ public class EnemyCreature : LivingCreature
     {
         base.Kill();
 
+        if (deathParticles != null)
+        {
+            GameObject clone = Instantiate(deathParticles, transform.position, transform.localRotation);
+            Destroy(clone, 3f);
+        }
+
+        GameManager.Score++;
         Destroy(gameObject);
-    }
-
-    void OnTriggerStay2D(Collider2D other)
-    {
-
     }
 }

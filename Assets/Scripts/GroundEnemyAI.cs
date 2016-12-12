@@ -13,7 +13,8 @@ public class GroundEnemyAI : MonoBehaviour
     public float timeToJumpApex = .4f;
     float accelerationTimeAirborne = .2f;
     float accelerationTimeGrounded = .1f;
-    public float moveSpeed = 6;
+    public float movementSpeed;
+    float moveSpeed = 6;
 
     bool jump;
 
@@ -25,7 +26,12 @@ public class GroundEnemyAI : MonoBehaviour
     Controller2D controller;
     LivingCreature creature;
     Animator anim;
+
+    enum EnemyState { idle, stop, walk, attack };
+    EnemyState currentState = EnemyState.idle;
+    int playerDirection = 0;
     int facing = 1;
+    int idleMovement = 0;
 
     void Start ()
     {
@@ -49,51 +55,49 @@ public class GroundEnemyAI : MonoBehaviour
             velocity.y = 0;
         }
 
+        if (currentState == EnemyState.idle)
+            moveSpeed = movementSpeed / 3;
+        else
+            moveSpeed = movementSpeed;
+
         Vector2 input;
-        input.x = SearchPlayer();
+        currentState = SearchPlayer();
+        input.x = playerDirection;
+
+        switch(currentState)
+        {
+            case EnemyState.idle:
+                {
+                    input.x = Idle() * facing;
+                    break;
+                }
+            case EnemyState.stop:
+                {
+                    input.x = 0;
+                    break;
+                }
+            case EnemyState.walk:
+                {
+                    break;
+                }
+            case EnemyState.attack:
+                {                    
+                    creature.stats.animationBusy = true;
+                    anim.SetTrigger("Attack");
+                    Animations(input.x);
+                    input.x = 0;
+                    break;
+                }
+        }
+
+        // Attack cooldown
+        attackTimer -= Time.deltaTime;
 
         // Block movement if stunned or busy
         if (creature.stats.stunned || creature.stats.animationBusy)
             input.x = 0;
 
-        attackTimer -= Time.deltaTime;
-
-        #region Animations
-
-        if (input.x != 0)
-        {
-            facing = (int)input.x;
-            Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
-
-            if (transform.FindChild("Hitbox") != null)
-            {
-                if (facing > 0)
-                {
-                    hitboxPos.x = Mathf.Abs(hitboxPos.x);
-                }
-                else if (facing < 0)
-                {
-                    hitboxPos.x = -Mathf.Abs(hitboxPos.x);
-                }
-
-                transform.FindChild("Hitbox").localPosition = hitboxPos;
-            }
-        }        
-
-        GetComponent<SpriteRenderer>().flipX = facing < 0;        
-
-        anim.SetFloat("Input", Mathf.Abs(input.x));
-        //anim.SetBool("Grounded", controller.collisions.below);
-
-        // Attack
-        if (Mathf.Abs(input.x) == 2)
-        {
-            creature.stats.animationBusy = true;
-            anim.SetTrigger("Attack");
-            return;
-        }
-
-        #endregion
+        Animations(input.x);
 
         #region Jumping
 
@@ -114,50 +118,102 @@ public class GroundEnemyAI : MonoBehaviour
         #endregion
     }
 
-    int SearchPlayer()
+    int Idle()
+    {        
+        if(Mathf.Abs(idleMovement) == 0)
+        {
+            idleMovement = 300;
+            facing *= -1;
+            return 0;
+        }
+        else
+        {
+            idleMovement--;
+            return 1;
+        }
+    }
+
+    EnemyState SearchPlayer()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
+        // If no player return
         if(player == null)
         {
             Debug.LogError("GroundEnemyAI can't find player.");
-            return 0;
+            return EnemyState.idle;
         }
 
         float distanceToPlayer = player.transform.position.x - transform.position.x;
 
+        // If player is out of range return
         if (Mathf.Abs(distanceToPlayer) > range)
         {
             Debug.Log("Player out of range.");
-            return 0;
+            return EnemyState.idle;
         }
 
-        int playerDirection;
-
+        // If player is on top of enemy, stop
         if (distanceToPlayer == 0)
         {
-            playerDirection = 0;
+            return EnemyState.stop;
         }
+        // If player is in attack range, attack - if it's on cooldown, stop
         else if (distanceToPlayer < attackRange && distanceToPlayer > -attackRange)
         {
             if(attackTimer <= 0)
             {
-                playerDirection = distanceToPlayer > 0 ? 2 : -2;
+                playerDirection = distanceToPlayer > 0 ? 1 : -1;
                 attackTimer = attackCooldown;
+                return EnemyState.attack;
             }
             else
             {
-                playerDirection = 0;
+                return EnemyState.stop;
             }
         }
+        // Else walk towards player
         else
         {
-            if (distanceToPlayer > 0)
+            if (distanceToPlayer > 0)                
+            {
                 playerDirection = 1;
+                return EnemyState.walk;
+            }
             else
+            {
                 playerDirection = -1;
+                return EnemyState.walk;
+            }
+        }
+    }
+
+    void Animations(float input)
+    {
+        if (input != 0)
+        {
+            facing = (int)input;
+            Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
+
+            if (transform.FindChild("Hitbox") != null)
+            {
+                if (facing > 0)
+                {
+                    hitboxPos.x = Mathf.Abs(hitboxPos.x);
+                }
+                else if (facing < 0)
+                {
+                    hitboxPos.x = -Mathf.Abs(hitboxPos.x);
+                }
+
+                transform.FindChild("Hitbox").localPosition = hitboxPos;
+            }
+
         }
 
-        return playerDirection;
+        GetComponent<SpriteRenderer>().flipX = facing < 0;
+
+        anim.SetFloat("Input", Mathf.Abs(input));
+        //anim.SetBool("Grounded", controller.collisions.below);
     }
 }
