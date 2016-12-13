@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class StatBars : MonoBehaviour
 {
-	public enum Stat { HP, Stamina };
+	public enum Stat { HP, Stamina, RH };
     public Stat chooseStat;
 
 	void Update ()
@@ -14,6 +14,7 @@ public class StatBars : MonoBehaviour
         if (player == null)
             return;
         LivingCreature.Statistics stats = player.GetComponent<PlayerCreature>().stats;
+        PlayerCreature pc = player.GetComponent<PlayerCreature>();
 
         switch (chooseStat)
         {
@@ -31,6 +32,14 @@ public class StatBars : MonoBehaviour
                     rt.sizeDelta = new Vector2(stats.maxStamina * 2, rt.sizeDelta.y);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, stats.curStamina / stats.maxStamina, 0.15f);                    
+                    break;
+                }
+            case Stat.RH:
+                {
+                    RectTransform rt = GetComponent<RectTransform>();
+                    rt.sizeDelta = new Vector2(stats.maxHealth * 2, rt.sizeDelta.y);
+
+                    GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, (float) (stats.curHealth + pc.healthToRestore) / stats.maxHealth, 0.15f);
                     break;
                 }
         }

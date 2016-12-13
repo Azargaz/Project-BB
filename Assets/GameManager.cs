@@ -25,6 +25,10 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
             }            
         }
+        else
+        {
+            GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text = "Score: " + Score;
+        }
     }
 
     public void GameOver()

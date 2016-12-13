@@ -12,14 +12,11 @@ public class DamagePlayer : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.GetComponent<PlayerCreature>() != null)
+        if (other.GetComponent<LivingCreature>() != null)
         {
-            PlayerCreature player = other.GetComponent<PlayerCreature>();
+            LivingCreature player = other.GetComponent<LivingCreature>();
 
-            if (ticksOfDamage > 0)
-                StartCoroutine(player.DamageOverTime(ticksOfDamage, damage, damageInterval, stunPlayer, poiseDmg));
-            else
-                player.Damage(damage, stunPlayer, poiseDmg);
+            player.Damage(damage, poiseDmg, transform.root.gameObject.GetComponent<LivingCreature>());
         }
     }
 }

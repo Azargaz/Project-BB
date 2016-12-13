@@ -22,11 +22,11 @@ public class EnemyCreature : LivingCreature
         base.Update();
     }
 
-    public override void Damage(int damageTaken, bool stun, int poiseDamage)
+    public override bool Damage(int damageTaken, int poiseDamage, LivingCreature dmgSource)
     {
-        base.Damage(damageTaken, stun, poiseDamage);
+        base.Damage(damageTaken, poiseDamage, dmgSource);
 
-        if (!stats.stunned && stun && stats.poise <= 0)
+        if (!stats.stunned && stats.poise <= 0)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");            
@@ -40,6 +40,8 @@ public class EnemyCreature : LivingCreature
             GameObject clone = Instantiate(hitParticles, transform.position, transform.localRotation, transform);
             Destroy(clone, 3f);
         }
+
+        return true;
     }
 
     public override void Kill()

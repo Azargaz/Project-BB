@@ -4,17 +4,22 @@ using System.Collections;
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
+    [Header("Dashing and attacking")]
+    public int dashCost;
+    public int[] attackCosts = new int[0];
     [Range(0, 100)]
     public float dashLength = 4;
     [Range(0, 100)]
     public float trailLength = 4;
     [Range(0, 100)]
     public float attackStepLength = 4;
+
+    [Header("Movement")]
     public float jumpHeight = 4;
     public float timeToJumpApex = .4f;
     float accelerationTimeAirborne = .2f;
     float accelerationTimeGrounded = .1f;
-    float moveSpeed = 6;
+    public float moveSpeed = 6;
 
     float gravity;
     float jumpVelocity;
@@ -23,15 +28,17 @@ public class Player : MonoBehaviour
 
     Controller2D controller;
     PlayerCreature creature;
+    LivingCreature.Statistics stats;
     Transform trail;
     Animator anim;
-    int facing = 1;
+    public int facing = 1;
 
     void Start()
     {
         trail = transform.FindChild("Trail");
         controller = GetComponent<Controller2D>();
         creature = GetComponent<PlayerCreature>();
+        stats = creature.stats;
         anim = GetComponent<Animator>();
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
@@ -123,6 +130,46 @@ public class Player : MonoBehaviour
         #endregion
     }
 
+    #region AnimationEvents + stamina costs
+
+    public enum StaminaCosts { dash, attack1 };
+
+    void AnimationDrainStamina(StaminaCosts cost)
+    {
+        switch (cost)
+        {
+            case StaminaCosts.dash:
+                {
+                    stats.curStamina -= dashCost;
+                    break;
+                }
+            case StaminaCosts.attack1:
+                {
+                    stats.curStamina -= attackCosts[0];
+                    break;
+                }
+        }
+
+        stats.DelayStaminaRegen();
+    }
+
+    void AnimationInvincibility()
+    {
+        stats.invincible = !stats.invincible;
+    }
+
+    void AnimationDashStep()
+    {
+        float input = Input.GetAxisRaw("Horizontal");
+
+        if (input != 0)
+            velocity.x = dashLength * input;
+        else
+            velocity.x = dashLength * facing;
+
+        controller.Move(velocity * Time.deltaTime);
+    }    
+
     void AnimationAttackStep()
     {
         float input = Input.GetAxisRaw("Horizontal");
@@ -154,15 +201,5 @@ public class Player : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
-    void AnimationDashStep()
-    {
-        float input = Input.GetAxisRaw("Horizontal");
-
-        if (input != 0)
-            velocity.x = dashLength * input;
-        else
-            velocity.x = dashLength * facing;
-
-        controller.Move(velocity * Time.deltaTime);
-    }
+    #endregion
 }

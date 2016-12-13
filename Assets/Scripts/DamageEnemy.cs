@@ -16,10 +16,7 @@ public class DamageEnemy : MonoBehaviour
         {
             EnemyCreature player = other.GetComponent<EnemyCreature>();
 
-            if (ticksOfDamage > 0)
-                StartCoroutine(player.DamageOverTime(ticksOfDamage, damage, damageInterval, stunEnemy, poiseDmg));
-            else
-                player.Damage(damage, stunEnemy, poiseDmg);
+            player.Damage(damage, poiseDmg, transform.root.gameObject.GetComponent<LivingCreature>());
         }
     }
 }

@@ -5,12 +5,13 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public GameObject enemy;
+    public int enemiesPerWave;
 
 	void Update ()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 
-        if(enemies.Length < 1)
+        if(enemies.Length < enemiesPerWave)
         {
             Instantiate(enemy);
         }

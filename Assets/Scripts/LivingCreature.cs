@@ -24,7 +24,7 @@ public abstract class LivingCreature : MonoBehaviour
         public bool alive;
         public bool invincible;
 
-        [Header("'Dont change' stats")]
+        [Header("Dont change - info only")]
         public int curHealth;
         public float curStamina;
         public float regenHealthTime = 0;
@@ -102,23 +102,14 @@ public abstract class LivingCreature : MonoBehaviour
             return;
     }
 
-    public virtual void Damage(int damageTaken, bool stun, int poiseDamage)
+    public virtual bool Damage(int damageTaken, int poiseDamage, LivingCreature dmgSource)
     {
         if (stats.invincible)
-            return;
+            return false;
 
         stats.curHealth -= damageTaken;
         stats.poise -= poiseDamage;
-    }
-
-    public IEnumerator DamageOverTime(int ticks, int damagePerTick, float damageInterval, bool _stun, int poiseDamage)
-    {
-        Damage(damagePerTick, _stun, poiseDamage);
-
-        yield return new WaitForSeconds(damageInterval);
-
-        if (ticks > 1)
-            StartCoroutine(DamageOverTime(ticks - 1, damagePerTick, damageInterval, _stun, poiseDamage));
+        return true;
     }
 
     public virtual void Kill()

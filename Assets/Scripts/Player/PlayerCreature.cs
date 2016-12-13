@@ -6,14 +6,13 @@ using UnityEngine.SceneManagement;
 public class PlayerCreature : LivingCreature
 {
     Animator anim;
-    public int dashCost;
-    public int attack1Cost;
+    Player movController;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
-
         stats.Initialize();
+        movController = GetComponent<Player>();
     }
 
     protected override void Update()
@@ -24,23 +23,85 @@ public class PlayerCreature : LivingCreature
             stats.invincible = false;
 
         // Dashing            
-        if (Input.GetButtonDown("Jump") && stats.curStamina >= dashCost)
+        if (Input.GetButtonDown("Jump") && stats.curStamina >= movController.dashCost)
         {
             anim.SetTrigger("Dashing");
         }
 
         // Attacking  
-        if (Input.GetButtonDown("Fire1") && stats.curStamina >= attack1Cost)
+        if (Input.GetButtonDown("Fire1") && stats.curStamina >= movController.attackCosts[0])
         {
             anim.SetTrigger("Attack");
         }
+
+        #region Restore health
+
+        if (timeToRH > 0)
+            timeToRH -= Time.deltaTime;
+        else
+        {
+            if(RHDecayIntervalTime <= 0)
+            {
+                RHDecayIntervalTime = RHDecayInterval;
+
+                if (healthToRestore >= RHDecayAmount)
+                    healthToRestore -= RHDecayAmount;
+                else
+                    healthToRestore = 0;
+            }
+            else
+            {
+                RHDecayIntervalTime -= Time.deltaTime;
+            }
+        }
+
+        #endregion
     }
 
-    public override void Damage(int damageTaken, bool stun, int poiseDamage)
-    {
-        base.Damage(damageTaken, stun, poiseDamage);
+    #region Restore health
 
-        if(!stats.stunned && stun && stats.poise <= 0)
+    [HideInInspector]
+    public int healthToRestore = 0;
+
+    [Header("Restore Health mechanic")]    
+    [SerializeField]
+    int RHAmount;
+    [SerializeField]
+    int RHDecayAmount;
+    [SerializeField]
+    float RHDecayInterval;
+    float RHDecayIntervalTime;    
+    [SerializeField]
+    float timeForRH;
+    float timeToRH;
+
+    public void RestoreHealthAfterAttack()
+    {
+        if (healthToRestore <= 0)
+            return;
+
+        int amount = 0;
+        if (healthToRestore >= RHAmount)
+            amount = RHAmount;
+        else
+            amount = healthToRestore;
+        healthToRestore -= amount;
+        stats.curHealth += amount;
+    }
+
+    #endregion
+
+    public override bool Damage(int damageTaken, int poiseDamage, LivingCreature dmgSource)
+    {
+        base.Damage(damageTaken, poiseDamage, dmgSource);
+
+        healthToRestore += damageTaken;
+        timeToRH = timeForRH;
+
+        if (timeToRH <= 0)
+            timeToRH = timeForRH;
+
+        if(!stats.stunned && stats.poise <= 0)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");
@@ -48,6 +109,8 @@ public class PlayerCreature : LivingCreature
             stats.stunned = true;
             stats.poise = stats.maxPoise;
         }
+
+        return true;
     }
 
     public override void Kill()
@@ -61,34 +124,4 @@ public class PlayerCreature : LivingCreature
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
-
-    #region Animation events
-
-    void AnimationInvincibility()
-    {
-        stats.invincible = !stats.invincible;
-    }
-
-    public enum StaminaCosts { dash, attack1 };
-
-    void AnimationDrainStamina(StaminaCosts cost)
-    {
-        switch(cost)
-        {
-            case StaminaCosts.dash:
-                {
-                    stats.curStamina -= dashCost;
-                    break;
-                }
-            case StaminaCosts.attack1:
-                {
-                    stats.curStamina -= attack1Cost;
-                    break;
-                }
-        }
-
-        stats.DelayStaminaRegen();
-    }
-
-    #endregion
 }
