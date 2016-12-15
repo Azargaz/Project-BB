@@ -19,21 +19,6 @@ public class PlayerCreature : LivingCreature
     {
         base.Update();
 
-        if(!anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
-            stats.invincible = false;
-
-        // Dashing            
-        if (Input.GetButtonDown("Jump") && stats.curStamina >= movController.dashCost)
-        {
-            anim.SetTrigger("Dashing");
-        }
-
-        // Attacking  
-        if (Input.GetButtonDown("Fire1") && stats.curStamina >= movController.attackCosts[0])
-        {
-            anim.SetTrigger("Attack");
-        }
-
         #region Restore health
 
         if (timeToRH > 0)

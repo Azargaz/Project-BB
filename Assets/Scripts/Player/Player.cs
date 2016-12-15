@@ -56,6 +56,21 @@ public class Player : MonoBehaviour
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
+            stats.invincible = false;
+
+        // Dashing            
+        if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
+        {
+            anim.SetTrigger("Dashing");
+        }
+
+        // Attacking  
+        if (Input.GetButtonDown("Fire1") && stats.curStamina >= attackCosts[0])
+        {
+            anim.SetTrigger("Attack");
+        }
+
         #region Animation
 
         anim.SetFloat("Input", Mathf.Abs(input.x));
@@ -103,10 +118,10 @@ public class Player : MonoBehaviour
 
         #region Jumping
 
-        //if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
-        //{
-        //    velocity.y = jumpVelocity;
-        //}
+        if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player") && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+        {
+            velocity.y = jumpVelocity;
+        }
 
         #endregion
 
