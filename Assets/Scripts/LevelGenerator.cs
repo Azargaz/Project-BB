@@ -6,7 +6,8 @@ public class LevelGenerator : MonoBehaviour
 {
     public int rooms;
     public List<GameObject> roomTypes = new List<GameObject>();
-    List<RoomObject.Exit> spawnedRoomsExits = new List<RoomObject.Exit>();
+    public List<RoomObject.Exit> spawnedRoomsExits = new List<RoomObject.Exit>();
+
     List<Vector3> occupiedTiles = new List<Vector3>();
     GameObject roomToSpawn = null;
     RoomObject lastSpawnedRoom = null;
@@ -61,6 +62,61 @@ public class LevelGenerator : MonoBehaviour
             spawnedRoomsExits.RemoveAt(exitToRemove);
         }
 
+        List<RoomObject.Exit> exitsToRemove = new List<RoomObject.Exit>();
+
+        for (int k = 0; k < spawnedRoomsExits.Count; k++)
+        {
+            switch (spawnedRoomsExits[k].dir)
+            {
+                case RoomObject.Exit.Direction.North:
+                    {
+                        if (occupiedTiles.Contains(new Vector3(spawnedRoomsExits[k].pos.x, spawnedRoomsExits[k].pos.y + 1, 0)))
+                        {
+                            exitsToRemove.Add(spawnedRoomsExits[k]);
+                            Debug.Log("DELETE EXIT");
+                        }
+                        break;
+                    }
+                case RoomObject.Exit.Direction.South:
+                    {
+                        if (occupiedTiles.Contains(new Vector3(spawnedRoomsExits[k].pos.x, spawnedRoomsExits[k].pos.y - 1, 0)))
+                        {
+                            exitsToRemove.Add(spawnedRoomsExits[k]);
+                            Debug.Log("DELETE EXIT");
+                        }
+                        break;
+                    }
+                case RoomObject.Exit.Direction.East:
+                    {
+                        if (occupiedTiles.Contains(new Vector3(spawnedRoomsExits[k].pos.x + 1, spawnedRoomsExits[k].pos.y, 0)))
+                        {
+                            exitsToRemove.Add(spawnedRoomsExits[k]);
+                            Debug.Log("DELETE EXIT");
+                        }
+                        break;
+                    }
+                case RoomObject.Exit.Direction.West:
+                    {
+                        if (occupiedTiles.Contains(new Vector3(spawnedRoomsExits[k].pos.x - 1, spawnedRoomsExits[k].pos.y, 0)))
+                        {
+                            exitsToRemove.Add(spawnedRoomsExits[k]);
+                            Debug.Log("DELETE EXIT");
+                        }
+                        break;
+                    }
+            }
+        }
+
+        for (int x = 0; x < exitsToRemove.Count; x++)
+        {
+            spawnedRoomsExits.Remove(exitsToRemove[x]);
+        }
+
+        for (int i = 0; i < spawnedRoomsExits.Count; i++)
+        {
+            spawnedRoomsExits[i].BlockExit();
+        }
+
         #region Spawning background
 
         int maxX = (int)occupiedTiles[0].x;
@@ -83,10 +139,11 @@ public class LevelGenerator : MonoBehaviour
                 maxY = (int)occupiedTiles[i].y;
         }
 
-        maxX += 3;
-        minX -= 3;
-        maxY += 3;
-        minY -= 3;
+        int border = 2;
+        maxX += border;
+        minX -= border;
+        maxY += border;
+        minY -= border;
 
         for (int i = minX; i < maxX; i++)
         {
@@ -185,6 +242,7 @@ public class LevelGenerator : MonoBehaviour
 
             if (occupiedTiles.Contains(posToCheckInHashset))
             {
+                spawnedRoomsExits.Remove(temp);
                 Debug.Log("No space for new room");
                 return false;
             }
@@ -194,7 +252,7 @@ public class LevelGenerator : MonoBehaviour
                 Debug.Log("No matching exit in roomToSpawn");
                 return false;
             }
-                        
+
             spawnedRoomsExits.Remove(temp);
             return true;
         }
