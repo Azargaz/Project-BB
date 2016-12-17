@@ -13,7 +13,7 @@ public class Spawner : MonoBehaviour
 
         if(enemies.Length < enemiesPerWave)
         {
-            Instantiate(enemy);
+            Instantiate(enemy, transform.position, Quaternion.identity);
         }
 	}
 }

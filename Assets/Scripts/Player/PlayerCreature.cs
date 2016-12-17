@@ -6,13 +6,11 @@ using UnityEngine.SceneManagement;
 public class PlayerCreature : LivingCreature
 {
     Animator anim;
-    Player movController;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
         stats.Initialize();
-        movController = GetComponent<Player>();
     }
 
     protected override void Update()

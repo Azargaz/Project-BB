@@ -16,7 +16,7 @@ public class GroundEnemyAI : MonoBehaviour
     public float movementSpeed;
     float moveSpeed = 6;
 
-    bool jump;
+    bool jump = false;
 
     float gravity;
     float jumpVelocity;
