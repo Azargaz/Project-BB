@@ -55,6 +55,9 @@ public class Controller2D : MonoBehaviour
 
             if (hit)
             {
+                if (hit.collider.gameObject.layer == 11)
+                    continue;
+
                 velocity.x = (hit.distance - skinWidth) * directionX;
                 rayLength = hit.distance;
 
@@ -79,11 +82,14 @@ public class Controller2D : MonoBehaviour
 
             if (hit)
             {
+                if (hit.collider.gameObject.layer == 11 && directionY == 1)
+                    continue;
+
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
                 collisions.below = directionY == -1;
-                collisions.above = directionY == 1;
+                collisions.above = directionY == 1;                 
             }
         }
     }

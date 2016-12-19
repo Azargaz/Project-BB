@@ -15,14 +15,16 @@ public class Player : MonoBehaviour
     public float attackStepLength = 4;
 
     [Header("Movement")]
-    public float jumpHeight = 4;
+    public float maxJumpHeight = 4;
+    public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
     float accelerationTimeAirborne = .2f;
     float accelerationTimeGrounded = .1f;
     public float moveSpeed = 6;
 
     float gravity;
-    float jumpVelocity;
+    float maxJumpVelocity;
+    float minJumpVelocity;
     Vector3 velocity;
     float velocityXSmoothing;
 
@@ -41,14 +43,20 @@ public class Player : MonoBehaviour
         stats = creature.stats;
         anim = GetComponent<Animator>();
 
-        gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-        
-        //print("Gravity: " + gravity + "  Jump Velocity: " + jumpVelocity);
+        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
+        maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
+
+        //print("Gravity: " + gravity + "  Jump Velocity: " + maxJumpVelocity);
     }
 
     void Update()
     {
+        if(transform.position.y < -100)
+        {
+            transform.position = Vector2.one;
+        }
+
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
@@ -118,9 +126,19 @@ public class Player : MonoBehaviour
 
         #region Jumping
 
-        if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player") && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+        if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player") && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
-            velocity.y = jumpVelocity;
+            if (controller.collisions.below)
+            {
+                velocity.y = maxJumpVelocity;
+            }                       
+        }
+        if (Input.GetButtonUp("Jump"))
+        {
+            if (velocity.y > minJumpVelocity)
+            {
+                velocity.y = minJumpVelocity;
+            }
         }
 
         #endregion
