@@ -82,7 +82,8 @@ public class Controller2D : MonoBehaviour
 
             if (hit)
             {
-                if (hit.collider.gameObject.layer == 11 && directionY == 1)
+                //Platforms
+                if ((hit.collider.gameObject.layer == 11 && directionY == 1) || (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f))
                     continue;
 
                 velocity.y = (hit.distance - skinWidth) * directionY;

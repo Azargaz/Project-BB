@@ -84,12 +84,14 @@ public class Player : MonoBehaviour
         anim.SetFloat("Input", Mathf.Abs(input.x));
         anim.SetBool("Grounded", controller.collisions.below);
         
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player") || creature.stats.stunned)
+        if (creature.stats.stunned)
+        {
             input = Vector2.zero;
+        }
 
         #region Fliping sprites and hitbox
 
-        if (input.x != 0)
+        if (input.x != 0 && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
             facing = input.x > 0 ? 1 : -1;
             Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;

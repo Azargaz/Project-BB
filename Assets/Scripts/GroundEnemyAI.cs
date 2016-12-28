@@ -144,26 +144,27 @@ public class GroundEnemyAI : MonoBehaviour
             return EnemyState.idle;
         }
 
-        float distanceToPlayer = player.transform.position.x - transform.position.x;
+        float distanceToPlayerX = player.transform.position.x - transform.position.x;
+        float distanceToPlayerY = player.transform.position.y - transform.position.y;
 
         // If player is out of range return
-        if (Mathf.Abs(distanceToPlayer) > range)
+        if (Mathf.Abs(distanceToPlayerX) > range)
         {
             Debug.Log("Player out of range.");
             return EnemyState.idle;
         }
 
         // If player is on top of enemy, stop
-        if (distanceToPlayer == 0)
+        if (distanceToPlayerX == 0)
         {
             return EnemyState.stop;
         }
         // If player is in attack range, attack - if it's on cooldown, stop
-        else if (distanceToPlayer < attackRange && distanceToPlayer > -attackRange)
+        else if (distanceToPlayerX < attackRange && distanceToPlayerX > -attackRange)
         {
-            if(attackTimer <= 0)
+            if(attackTimer <= 0 && Mathf.Abs(distanceToPlayerY) < attackRange)
             {
-                playerDirection = distanceToPlayer > 0 ? 1 : -1;
+                playerDirection = distanceToPlayerX > 0 ? 1 : -1;
                 attackTimer = attackCooldown;
                 return EnemyState.attack;
             }
@@ -175,7 +176,7 @@ public class GroundEnemyAI : MonoBehaviour
         // Else walk towards player
         else
         {
-            if (distanceToPlayer > 0)                
+            if (distanceToPlayerX > 0)                
             {
                 playerDirection = 1;
                 return EnemyState.walk;
