@@ -16,6 +16,7 @@ public class Controller2D : MonoBehaviour
     BoxCollider2D coll;
     RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
+    public bool player;
 
     void Start()
     {
@@ -83,8 +84,10 @@ public class Controller2D : MonoBehaviour
             if (hit)
             {
                 //Platforms
-                if ((hit.collider.gameObject.layer == 11 && directionY == 1) || (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f))
-                    continue;
+                if(player)                
+                    if ((hit.collider.gameObject.layer == 11 && directionY == 1) || (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f))
+                        continue;
+                
 
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;

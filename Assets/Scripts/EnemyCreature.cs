@@ -9,12 +9,13 @@ public class EnemyCreature : LivingCreature
     [SerializeField]
     GameObject deathParticles;
     Animator anim;
+    GroundEnemyAI controller;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
-
         stats.Initialize();
+        controller = GetComponent<GroundEnemyAI>();
     }
 
     protected override void Update()
@@ -22,23 +23,33 @@ public class EnemyCreature : LivingCreature
         base.Update();
     }
 
-    public override bool Damage(int damageTaken, int poiseDamage, LivingCreature dmgSource)
+    public override bool Damage(int damageTaken, LivingCreature dmgSource)
     {
-        base.Damage(damageTaken, poiseDamage, dmgSource);
+        base.Damage(damageTaken, dmgSource);
 
-        if (!stats.stunned && stats.poise <= 0)
+        if (stats.invincible)
+            return false;
+
+        if (!stats.stunned)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");            
 
             stats.stunned = true;
-            stats.poise = stats.maxPoise;
         }
 
         if (hitParticles != null)
         {
             GameObject clone = Instantiate(hitParticles, transform.position, transform.localRotation, transform);
             Destroy(clone, 3f);
+        }
+
+        // Knockback
+        if (stats.knockbackDistance != 0 && dmgSource != null)
+        {
+            float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
+            float velocityX = (direction > 0 ? -1 : 1) * stats.knockbackDistance;
+            controller.velocity.x += velocityX;
         }
 
         return true;

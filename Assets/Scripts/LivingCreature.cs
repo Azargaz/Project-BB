@@ -16,26 +16,27 @@ public abstract class LivingCreature : MonoBehaviour
         public float regenStaminaAmount;
         public float regenStaminaRate;        
         public float regenStaminaDelay;
-        
-        public float maxPoise;
+
+        public float knockbackDistance;
 
         public bool stunned;
         public bool animationBusy; // for animations
         public bool alive;
         public bool invincible;
 
+        public float defaultInvincibilityDuration;        
+
         [Header("Dont change - info only")]
         public int curHealth;
         public float curStamina;
         public float regenHealthTime = 0;
         public float regenStaminaTime = 0;
-        public float poise;
+        public float invincibilityTime = 0;
 
         public void Initialize()
         {
             curHealth = maxHealth;
             curStamina = maxStamina;
-            poise = maxPoise;
             stunned = false;
             alive = true;
         }
@@ -76,6 +77,14 @@ public abstract class LivingCreature : MonoBehaviour
         {
             regenStaminaTime = regenStaminaDelay;
         }
+
+        public void Invincibility(float duration = 0)
+        {
+            if(duration == 0)
+                duration = defaultInvincibilityDuration;
+
+            invincibilityTime = duration;
+        }
     }
 
     public Statistics stats = new Statistics();
@@ -98,18 +107,42 @@ public abstract class LivingCreature : MonoBehaviour
         if (stats.curStamina < 0)
             stats.curStamina = 0;
 
-        if (stats.stunned)
-            return;
+        Color color = GetComponent<SpriteRenderer>().color;
+        SpriteRenderer armorColor = null;
+
+        if (transform.FindChild("Armor") != null)
+            armorColor = transform.FindChild("Armor").GetComponent<SpriteRenderer>();
+
+        if (stats.invincibilityTime > 0)
+        {            
+            stats.invincible = true;
+            stats.invincibilityTime -= Time.deltaTime;
+            color = new Color(0.9f, 0.9f, 0.9f, 0.8f);
+        }
+        else if(stats.invincibilityTime <= 0)
+        {
+            stats.invincible = false;
+            color = new Color(1f, 1f, 1f, 1f);
+        }
+
+        GetComponent<SpriteRenderer>().color = color;
+
+        if (armorColor != null)
+            armorColor.color = color;
     }
 
-    public virtual bool Damage(int damageTaken, int poiseDamage, LivingCreature dmgSource)
+    public virtual bool Damage(int damageTaken, LivingCreature dmgSource)
     {
         if (stats.invincible)
+        {
             return false;
-
-        stats.curHealth -= damageTaken;
-        stats.poise -= poiseDamage;
-        return true;
+        }
+        else
+        {
+            stats.curHealth -= damageTaken;
+            stats.Invincibility();
+            return true;
+        }               
     }
 
     public virtual void Kill()
@@ -127,7 +160,7 @@ public abstract class LivingCreature : MonoBehaviour
     protected void AnimationBusyEnd()
     {
         stats.animationBusy = false;
-    }
+    } 
 
     #endregion
 }

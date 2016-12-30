@@ -25,7 +25,8 @@ public class Player : MonoBehaviour
     float gravity;
     float maxJumpVelocity;
     float minJumpVelocity;
-    Vector3 velocity;
+    [HideInInspector]
+    public Vector3 velocity;
     float velocityXSmoothing;
 
     Controller2D controller;
@@ -34,6 +35,7 @@ public class Player : MonoBehaviour
     Transform trail;
     Animator anim;
     public int facing = 1;
+    public GameObject attackSlash;
 
     void Start()
     {
@@ -64,9 +66,6 @@ public class Player : MonoBehaviour
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
-            stats.invincible = false;
-
         // Dashing            
         if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
         {
@@ -89,7 +88,7 @@ public class Player : MonoBehaviour
             input = Vector2.zero;
         }
 
-        #region Fliping sprites and hitbox
+        #region Fliping sprite and hitbox
 
         if (input.x != 0 && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
@@ -112,12 +111,7 @@ public class Player : MonoBehaviour
         }            
 
         GetComponent<SpriteRenderer>().flipX = facing == -1;
-        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
-
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            sprites[i].flipX = facing == -1;
-        }
+        FlipAllChildrenSprites();
 
         #endregion
 
@@ -128,7 +122,7 @@ public class Player : MonoBehaviour
 
         #region Jumping
 
-        if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player") && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+        if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
         {
             if (controller.collisions.below)
             {
@@ -159,10 +153,27 @@ public class Player : MonoBehaviour
 
         #endregion
 
+        // Dash without gravity below VVVVV
+
+        //if (!anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
+        //    velocity.y += gravity * Time.deltaTime;
+        //else
+        //    velocity.y = 0;
+
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
         #endregion
+    }
+
+    void FlipAllChildrenSprites()
+    {
+        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
+
+        for (int i = 0; i < sprites.Length; i++)
+        {
+            sprites[i].flipX = facing == -1;
+        }
     }
 
     #region AnimationEvents + stamina costs
@@ -188,9 +199,19 @@ public class Player : MonoBehaviour
         stats.DelayStaminaRegen();
     }
 
-    void AnimationInvincibility()
+    void AnimationAttackSlash()
     {
-        stats.invincible = !stats.invincible;
+        if (attackSlash != null)
+        {
+            GameObject clone = Instantiate(attackSlash, transform);
+            clone.transform.position = new Vector2(transform.position.x + 0.5f * facing, transform.position.y);
+            FlipAllChildrenSprites();
+        }
+    }
+
+    void AnimationInvincibility(float dur)
+    {
+        stats.Invincibility(dur);
     }
 
     void AnimationDashStep()

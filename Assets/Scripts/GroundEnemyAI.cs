@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GroundEnemyAI : MonoBehaviour
 {
+    public float searchPlayerInterval;
     public float range;
     public float attackRange;
     public float attackCooldown;
@@ -20,18 +21,25 @@ public class GroundEnemyAI : MonoBehaviour
 
     float gravity;
     float jumpVelocity;
-    Vector3 velocity;
+    [HideInInspector]
+    public Vector3 velocity;
     float velocityXSmoothing;
 
     Controller2D controller;
     LivingCreature creature;
     Animator anim;
+    GameObject player;
 
     enum EnemyState { idle, stop, walk, attack };
     EnemyState currentState = EnemyState.idle;
     int playerDirection = 0;
     int facing = 1;
     int idleMovement = 0;
+    float searchPlayerDelay = 0;
+    Vector2 playerPos;
+
+    [Header("")]
+    public bool debug;
 
     void Start ()
     {
@@ -39,6 +47,9 @@ public class GroundEnemyAI : MonoBehaviour
         creature = GetComponent<LivingCreature>();
         anim = GetComponent<Animator>();
         attackTimer = attackCooldown;
+        moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
+        player = GameObject.FindGameObjectWithTag("Player");
+        playerPos = player.transform.position;
 
         #region Jumping
 
@@ -55,13 +66,8 @@ public class GroundEnemyAI : MonoBehaviour
             velocity.y = 0;
         }
 
-        if (currentState == EnemyState.idle)
-            moveSpeed = movementSpeed / 3;
-        else
-            moveSpeed = movementSpeed;
-
-        Vector2 input;
-        currentState = SearchPlayer();
+        Vector2 input;                
+        currentState = SearchPlayer();   
         input.x = playerDirection;
 
         switch(currentState)
@@ -90,12 +96,18 @@ public class GroundEnemyAI : MonoBehaviour
                 }
         }
 
-        // Attack cooldown
+        // Attack & SearchPlayer cooldown
         attackTimer -= Time.deltaTime;
+        searchPlayerDelay -= Time.deltaTime;
 
         // Block movement if stunned or busy
         if (creature.stats.stunned || creature.stats.animationBusy)
             input.x = 0;
+
+        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left))
+        {
+            jump = true;
+        }
 
         Animations(input.x);
 
@@ -104,6 +116,11 @@ public class GroundEnemyAI : MonoBehaviour
         if (jump && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
+            jump = false;
+        }
+        else if(!controller.collisions.below)
+        {
+            jump = false;
         }
 
         #endregion
@@ -134,37 +151,42 @@ public class GroundEnemyAI : MonoBehaviour
     }
 
     EnemyState SearchPlayer()
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
+    {        
         // If no player return
         if(player == null)
         {
-            Debug.LogError("GroundEnemyAI can't find player.");
+            if(debug)
+                Debug.LogError("GroundEnemyAI can't find player.");
             return EnemyState.idle;
         }
 
-        float distanceToPlayerX = player.transform.position.x - transform.position.x;
-        float distanceToPlayerY = player.transform.position.y - transform.position.y;
+        if (searchPlayerDelay <= 0)
+        {
+            playerPos = player.transform.position;
+            searchPlayerDelay = searchPlayerInterval;
+        }        
+
+        Vector2 distanceToPlayer = (Vector3) playerPos - transform.position;
 
         // If player is out of range return
-        if (Mathf.Abs(distanceToPlayerX) > range)
+        if (Mathf.Abs(distanceToPlayer.x) > range || Mathf.Abs(distanceToPlayer.y) > range)
         {
-            Debug.Log("Player out of range.");
+            if (debug)
+                Debug.Log("Player out of range.");
             return EnemyState.idle;
         }
 
         // If player is on top of enemy, stop
-        if (distanceToPlayerX == 0)
+        if (Mathf.Abs(distanceToPlayer.x) < 0.5f || (Mathf.Abs(distanceToPlayer.x) < 0.5f && Mathf.Abs(distanceToPlayer.y) < 0.5f))
         {
             return EnemyState.stop;
         }
         // If player is in attack range, attack - if it's on cooldown, stop
-        else if (distanceToPlayerX < attackRange && distanceToPlayerX > -attackRange)
+        else if (Mathf.Abs(distanceToPlayer.x) < attackRange && Mathf.Abs(distanceToPlayer.y) < attackRange)
         {
-            if(attackTimer <= 0 && Mathf.Abs(distanceToPlayerY) < attackRange)
+            if(attackTimer <= 0)
             {
-                playerDirection = distanceToPlayerX > 0 ? 1 : -1;
+                playerDirection = distanceToPlayer.x > 0 ? 1 : -1;
                 attackTimer = attackCooldown;
                 return EnemyState.attack;
             }
@@ -176,16 +198,8 @@ public class GroundEnemyAI : MonoBehaviour
         // Else walk towards player
         else
         {
-            if (distanceToPlayerX > 0)                
-            {
-                playerDirection = 1;
-                return EnemyState.walk;
-            }
-            else
-            {
-                playerDirection = -1;
-                return EnemyState.walk;
-            }
+            playerDirection = distanceToPlayer.x > 0 ? 1 : -1;
+            return EnemyState.walk;
         }
     }
 

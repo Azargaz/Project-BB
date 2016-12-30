@@ -5,15 +5,18 @@ using UnityEngine;
 public class DamageLivingCreature : MonoBehaviour
 {
     public int damage;
-    public int poiseDmg;
+    public bool damagePlayer;
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerStay2D(Collider2D other)
     {
-        if (other.GetComponent<LivingCreature>() != null && other.name != transform.root.name)
+        if (other.GetComponent<LivingCreature>() != null)
         {
-            LivingCreature target = other.GetComponent<LivingCreature>();
+            if (damagePlayer && other.GetComponent<EnemyCreature>() != null)
+                return;
 
-            bool hit = target.Damage(damage, poiseDmg, transform.root.gameObject.GetComponent<LivingCreature>());
+            LivingCreature target = other.GetComponent<LivingCreature>();
+            
+            bool hit = target.Damage(damage, transform.parent.GetComponent<LivingCreature>());
 
             if(transform.root.GetComponent<PlayerCreature>() != null && hit)
             {
