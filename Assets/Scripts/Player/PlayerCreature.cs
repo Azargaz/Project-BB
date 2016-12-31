@@ -7,17 +7,25 @@ public class PlayerCreature : LivingCreature
 {
     Animator anim;
     Player controller;
+    [HideInInspector]
+    public WeaponManager weaponM;
 
     void Awake()
     {
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<Player>();
+        weaponM = transform.GetComponentInChildren<WeaponManager>();
     }
 
     protected override void Update()
     {
         base.Update();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+            RestartGame();
+
+        stats.knockbackPower = weaponM.weapons[weaponM.currentWeapon].knockbackPower;
 
         #region Restore health
 
@@ -76,9 +84,9 @@ public class PlayerCreature : LivingCreature
 
     #endregion
 
-    public override bool Damage(int damageTaken, LivingCreature dmgSource)
+    public override bool Damage(int damageTaken, LivingCreature dmgSource, int knockbackPower)
     {
-        base.Damage(damageTaken, dmgSource);
+        base.Damage(damageTaken, dmgSource, knockbackPower);
 
         if (stats.invincible)
             return false;
@@ -98,10 +106,10 @@ public class PlayerCreature : LivingCreature
         }
 
         // Knockback
-        if (stats.knockbackDistance != 0 && dmgSource != null)
+        if (knockbackPower != 0 && dmgSource != null)
         {
             float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
-            float velocityX = (direction > 0 ? -1 : 1) * stats.knockbackDistance;
+            float velocityX = (direction > 0 ? -1 : 1) * knockbackPower;
             controller.velocity.x += velocityX;
         }
 

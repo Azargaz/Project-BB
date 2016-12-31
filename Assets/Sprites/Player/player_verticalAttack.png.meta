@@ -1,13 +1,13 @@
 fileFormatVersion: 2
-guid: 9badae1678e65214cb767564e19ca209
-timeCreated: 1483047851
+guid: 04bc1a37ebfcf9843a1f7ed75369af67
+timeCreated: 1483195979
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: attack_slash_1_0
-    21300002: attack_slash_1_1
-    21300004: attack_slash_1_2
-    21300006: attack_slash_1_3
+    21300000: player_verticalAttack_0
+    21300002: player_verticalAttack_1
+    21300004: player_verticalAttack_2
+    21300006: player_verticalAttack_3
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -90,52 +90,52 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: attack_slash_1_0
+      name: player_verticalAttack_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 64
-        height: 64
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_slash_1_1
+      name: player_verticalAttack_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: player_verticalAttack_2
       rect:
         serializedVersion: 2
         x: 64
         y: 0
-        width: 64
-        height: 64
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_slash_1_2
+      name: player_verticalAttack_3
       rect:
         serializedVersion: 2
-        x: 128
+        x: 96
         y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: attack_slash_1_3
-      rect:
-        serializedVersion: 2
-        x: 192
-        y: 0
-        width: 64
-        height: 64
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

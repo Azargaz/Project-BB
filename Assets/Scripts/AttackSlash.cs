@@ -6,6 +6,6 @@ public class AttackSlash : MonoBehaviour
 {
     void SelfDestruct()
     {
-        Destroy(gameObject);
+        Destroy(transform.parent.gameObject);
     }
 }

@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
     [Header("Dashing and attacking")]
     public int dashCost;
-    public int[] attackCosts = new int[0];
     [Range(0, 100)]
     public float dashLength = 4;
     [Range(0, 100)]
@@ -32,10 +32,10 @@ public class Player : MonoBehaviour
     Controller2D controller;
     PlayerCreature creature;
     LivingCreature.Statistics stats;
+    WeaponManager weaponM;
     Transform trail;
     Animator anim;
     public int facing = 1;
-    public GameObject attackSlash;
 
     void Start()
     {
@@ -44,6 +44,7 @@ public class Player : MonoBehaviour
         creature = GetComponent<PlayerCreature>();
         stats = creature.stats;
         anim = GetComponent<Animator>();
+        weaponM = transform.GetComponentInChildren<WeaponManager>();
 
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
@@ -73,50 +74,32 @@ public class Player : MonoBehaviour
         }
 
         // Attacking  
-        if (Input.GetButtonDown("Fire1") && stats.curStamina >= attackCosts[0])
+        if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.weapons[weaponM.currentWeapon].useStaminaCost)
         {
+            anim.SetFloat("AttackId", (float)weaponM.weapons[weaponM.currentWeapon].attackType / 10f);
             anim.SetTrigger("Attack");
         }
 
-        #region Animation
+        #region Animation, stunned, animationBusy, flipping sprites
 
         anim.SetFloat("Input", Mathf.Abs(input.x));
         anim.SetBool("Grounded", controller.collisions.below);
         
-        if (creature.stats.stunned)
+        if (creature.stats.stunned || creature.stats.animationBusy)
         {
             input = Vector2.zero;
         }
 
-        #region Fliping sprite and hitbox
+        #region Fliping sprite
 
         if (input.x != 0 && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
             facing = input.x > 0 ? 1 : -1;
-            Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
+        }         
 
-            if (transform.FindChild("Hitbox") != null)
-            {
-                if (facing > 0)
-                {
-                    hitboxPos.x = Mathf.Abs(hitboxPos.x);
-                }
-                else if (facing < 0)
-                {
-                    hitboxPos.x = -Mathf.Abs(hitboxPos.x);
-                }
-
-                transform.FindChild("Hitbox").localPosition = hitboxPos;
-            }
-        }            
-
-        GetComponent<SpriteRenderer>().flipX = facing == -1;
-        FlipAllChildrenSprites();
+        FlipAllSprites();
 
         #endregion
-
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
-            input = Vector2.zero;
 
         #endregion
 
@@ -166,11 +149,14 @@ public class Player : MonoBehaviour
         #endregion
     }
 
-    void FlipAllChildrenSprites()
+    void FlipAllSprites()
     {
-        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>();
+        List<SpriteRenderer> sprites = new List<SpriteRenderer>();
+        sprites.Add(GetComponent<SpriteRenderer>());
+        sprites.AddRange(transform.FindChild("Trail").GetComponentsInChildren<SpriteRenderer>());
+        sprites.Add(transform.FindChild("Armor").GetComponent<SpriteRenderer>());
 
-        for (int i = 0; i < sprites.Length; i++)
+        for (int i = 0; i < sprites.Count; i++)
         {
             sprites[i].flipX = facing == -1;
         }
@@ -178,35 +164,33 @@ public class Player : MonoBehaviour
 
     #region AnimationEvents + stamina costs
 
-    public enum StaminaCosts { dash, attack1 };
-
-    void AnimationDrainStamina(StaminaCosts cost)
+    void AnimationDash()
     {
-        switch (cost)
-        {
-            case StaminaCosts.dash:
-                {
-                    stats.curStamina -= dashCost;
-                    break;
-                }
-            case StaminaCosts.attack1:
-                {
-                    stats.curStamina -= attackCosts[0];
-                    break;
-                }
-        }
+        AnimationDrainStaminaDash();
+        AnimationDashStep();
+        AnimationInvincibility(0.1f);
+    }
 
+    void AnimationDrainStamina()
+    {
+        stats.curStamina -= weaponM.weapons[weaponM.currentWeapon].useStaminaCost;
+        stats.DelayStaminaRegen();
+    }
+
+    void AnimationDrainStaminaDash()
+    {
+        stats.curStamina -= dashCost;
         stats.DelayStaminaRegen();
     }
 
     void AnimationAttackSlash()
-    {
-        if (attackSlash != null)
+    {        
+        if (weaponM.weapons[weaponM.currentWeapon].aoeObject != null)
         {
-            GameObject clone = Instantiate(attackSlash, transform);
-            clone.transform.position = new Vector2(transform.position.x + 0.5f * facing, transform.position.y);
-            FlipAllChildrenSprites();
-        }
+            GameObject clone = Instantiate(weaponM.weapons[weaponM.currentWeapon].aoeObject, transform.FindChild("Swing"));
+            clone.transform.localScale = new Vector2(facing, 1);
+            clone.transform.localPosition = Vector3.zero;
+        }   
     }
 
     void AnimationInvincibility(float dur)

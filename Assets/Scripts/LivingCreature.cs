@@ -17,7 +17,7 @@ public abstract class LivingCreature : MonoBehaviour
         public float regenStaminaRate;        
         public float regenStaminaDelay;
 
-        public float knockbackDistance;
+        public int knockbackPower = 10;
 
         public bool stunned;
         public bool animationBusy; // for animations
@@ -131,7 +131,7 @@ public abstract class LivingCreature : MonoBehaviour
             armorColor.color = color;
     }
 
-    public virtual bool Damage(int damageTaken, LivingCreature dmgSource)
+    public virtual bool Damage(int damageTaken, LivingCreature dmgSource, int knockbackPower)
     {
         if (stats.invincible)
         {
@@ -155,6 +155,11 @@ public abstract class LivingCreature : MonoBehaviour
     protected void AnimationStunnedEnd()
     {
         stats.stunned = false;
+    }
+
+    protected void AnimationBusyStart()
+    {
+        stats.animationBusy = true;
     }
 
     protected void AnimationBusyEnd()

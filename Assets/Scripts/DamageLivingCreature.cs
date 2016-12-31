@@ -6,6 +6,23 @@ public class DamageLivingCreature : MonoBehaviour
 {
     public int damage;
     public bool damagePlayer;
+    PlayerCreature player;
+
+    void Awake()
+    {
+        if (transform.root.GetComponent<PlayerCreature>() != null)
+        {
+            player = transform.root.GetComponent<PlayerCreature>();
+        }
+    }
+
+    void Update()
+    {
+        if(player != null)
+        {
+            damage = player.weaponM.weapons[player.weaponM.currentWeapon].damage;
+        }
+    }
 
     void OnTriggerStay2D(Collider2D other)
     {
@@ -15,8 +32,16 @@ public class DamageLivingCreature : MonoBehaviour
                 return;
 
             LivingCreature target = other.GetComponent<LivingCreature>();
-            
-            bool hit = target.Damage(damage, transform.parent.GetComponent<LivingCreature>());
+            LivingCreature thisObject;
+
+            if (transform.parent.GetComponent<LivingCreature>() != null)
+                thisObject = transform.parent.GetComponent<LivingCreature>();
+            else if (transform.GetComponent<LivingCreature>() != null)
+                thisObject = transform.GetComponent<LivingCreature>();
+            else
+                thisObject = transform.root.GetComponent<LivingCreature>();
+
+            bool hit = target.Damage(damage, thisObject, thisObject == null ? 0 : thisObject.stats.knockbackPower);
 
             if(transform.root.GetComponent<PlayerCreature>() != null && hit)
             {

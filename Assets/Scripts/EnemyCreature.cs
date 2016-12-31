@@ -23,9 +23,9 @@ public class EnemyCreature : LivingCreature
         base.Update();
     }
 
-    public override bool Damage(int damageTaken, LivingCreature dmgSource)
+    public override bool Damage(int damageTaken, LivingCreature dmgSource, int knockbackPower)
     {
-        base.Damage(damageTaken, dmgSource);
+        base.Damage(damageTaken, dmgSource, knockbackPower);
 
         if (stats.invincible)
             return false;
@@ -45,10 +45,10 @@ public class EnemyCreature : LivingCreature
         }
 
         // Knockback
-        if (stats.knockbackDistance != 0 && dmgSource != null)
+        if (knockbackPower != 0 && dmgSource != null && controller != null)
         {
             float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
-            float velocityX = (direction > 0 ? -1 : 1) * stats.knockbackDistance;
+            float velocityX = (direction > 0 ? -1 : 1) * knockbackPower;
             controller.velocity.x += velocityX;
         }
 
