@@ -6,21 +6,25 @@ public class DamageLivingCreature : MonoBehaviour
 {
     public int damage;
     public bool damagePlayer;
-    PlayerCreature player;
+    LivingCreature creature;
 
     void Awake()
     {
-        if (transform.root.GetComponent<PlayerCreature>() != null)
+        if (transform.root.GetComponent<LivingCreature>() != null)
         {
-            player = transform.root.GetComponent<PlayerCreature>();
+            creature = transform.root.GetComponent<LivingCreature>();
+        }
+        else if(transform.parent.GetComponent<LivingCreature>() != null)
+        {
+            creature = transform.parent.GetComponent<LivingCreature>();
         }
     }
 
     void Update()
     {
-        if(player != null)
+        if(creature != null)
         {
-            damage = player.weaponM.weapons[player.weaponM.currentWeapon].damage;
+            damage = creature.stats.damage;
         }
     }
 

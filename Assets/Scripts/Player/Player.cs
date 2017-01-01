@@ -183,13 +183,19 @@ public class Player : MonoBehaviour
         stats.DelayStaminaRegen();
     }
 
-    void AnimationAttackSlash()
-    {        
-        if (weaponM.weapons[weaponM.currentWeapon].aoeObject != null)
+    void AnimationAttackSlash(int hitCount)
+    {
+        if (hitCount < 0)
+            return;
+
+        if (weaponM.equippedWeapon.aoeObject.Length < hitCount)
+            AnimationAttackSlash(hitCount - 1);
+
+        if (weaponM.equippedWeapon.aoeObject[hitCount] != null)
         {
-            GameObject clone = Instantiate(weaponM.weapons[weaponM.currentWeapon].aoeObject, transform.FindChild("Swing"));
-            clone.transform.localScale = new Vector2(facing, 1);
-            clone.transform.localPosition = Vector3.zero;
+            GameObject swing = weaponM.equippedWeapon.aoeObject[hitCount];
+            swing.transform.GetChild(0).GetComponent<Animator>().SetTrigger("Swing");
+            swing.transform.localScale = new Vector2(facing, 1);            
         }   
     }
 

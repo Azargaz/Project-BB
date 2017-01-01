@@ -25,7 +25,8 @@ public class PlayerCreature : LivingCreature
         if (Input.GetKeyDown(KeyCode.Escape))
             RestartGame();
 
-        stats.knockbackPower = weaponM.weapons[weaponM.currentWeapon].knockbackPower;
+        stats.damage = weaponM.equippedWeapon.damage;
+        stats.knockbackPower = weaponM.equippedWeapon.knockbackPower;        
 
         #region Restore health
 

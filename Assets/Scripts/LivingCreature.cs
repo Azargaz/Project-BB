@@ -17,6 +17,7 @@ public abstract class LivingCreature : MonoBehaviour
         public float regenStaminaRate;        
         public float regenStaminaDelay;
 
+        public int damage;
         public int knockbackPower = 10;
 
         public bool stunned;

@@ -10,9 +10,20 @@ public class EnemyCreature : LivingCreature
     GameObject deathParticles;
     Animator anim;
     GroundEnemyAI controller;
+    public int enemySize;
 
     void Awake()
     {
+        if (name.Contains("Slime"))
+            enemySize = Random.Range(1, 3);
+
+        if(enemySize > 1)
+        {
+            stats.maxHealth += (stats.maxHealth * (enemySize - 1)) / 2;
+            stats.damage += (stats.damage * (enemySize - 1)) / 2;
+            stats.knockbackPower += (stats.knockbackPower * (enemySize - 1)) / 2;
+        }
+
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<GroundEnemyAI>();
@@ -20,6 +31,11 @@ public class EnemyCreature : LivingCreature
 
     protected override void Update()
     {
+        if(enemySize > 1)
+        {
+            transform.localScale = new Vector3(enemySize, enemySize, 1);
+        }
+
         base.Update();
     }
 
@@ -62,6 +78,7 @@ public class EnemyCreature : LivingCreature
         if (deathParticles != null)
         {
             GameObject clone = Instantiate(deathParticles, transform.position, transform.localRotation);
+            clone.transform.localScale = new Vector3(enemySize, enemySize, 1);
             Destroy(clone, 3f);
         }
 
