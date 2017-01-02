@@ -8,11 +8,22 @@ public class GameManager : MonoBehaviour
 {
     public static int Score = 0;
     public static GameManager instance;
+    public GameObject playerPrefab;
+    public static GameObject player;
 
     void Awake()
     {
+        if (instance != null)
+            Destroy(gameObject);
+
         instance = this;
         DontDestroyOnLoad(this);
+
+        if (player == null)
+        {
+            player = Instantiate(playerPrefab);
+            player.transform.position = new Vector3(0, 6, 0);
+        }
     }
 
     void Update()
@@ -22,6 +33,8 @@ public class GameManager : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.Return))
             {
                 SceneManager.LoadScene(0);
+                if(player != null)
+                    Destroy(player);
                 Destroy(gameObject);
             }            
         }

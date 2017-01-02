@@ -26,7 +26,7 @@ public class GroundEnemyAI : MonoBehaviour
     float velocityXSmoothing;
 
     Controller2D controller;
-    LivingCreature creature;
+    EnemyCreature creature;
     Animator anim;
     GameObject player;
 
@@ -44,12 +44,17 @@ public class GroundEnemyAI : MonoBehaviour
     void Start ()
     {
         controller = GetComponent<Controller2D>();
-        creature = GetComponent<LivingCreature>();
+        creature = GetComponent<EnemyCreature>();
         anim = GetComponent<Animator>();
         attackTimer = attackCooldown;
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
         player = GameObject.FindGameObjectWithTag("Player");
         playerPos = player.transform.position;
+        
+        if(creature.enemySize > 1)
+        {
+            attackRange += (attackRange * (creature.enemySize - 1)) / 2;
+        }
 
         #region Jumping
 
@@ -136,18 +141,8 @@ public class GroundEnemyAI : MonoBehaviour
     }
 
     int Idle()
-    {        
-        if(Mathf.Abs(idleMovement) == 0)
-        {
-            idleMovement = 300;
-            facing *= -1;
-            return 0;
-        }
-        else
-        {
-            idleMovement--;
-            return 1;
-        }
+    {
+        return -0;
     }
 
     EnemyState SearchPlayer()

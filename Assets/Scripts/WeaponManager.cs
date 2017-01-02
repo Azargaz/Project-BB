@@ -21,7 +21,6 @@ public class WeaponManager : MonoBehaviour
     }
 
     public static WeaponManager wp;
-    public Image weaponSpriteHUD;
     [HideInInspector]
     public Weapon equippedWeapon;
     public int currentWeapon = 0;
@@ -34,11 +33,6 @@ public class WeaponManager : MonoBehaviour
 
 	void Update ()
     {
-		if(weaponSpriteHUD != null && weapons[currentWeapon].sprite != null)
-        {
-            weaponSpriteHUD.sprite = weapons[currentWeapon].sprite;
-        }
-
         equippedWeapon = weapons[currentWeapon];
 	}
 }

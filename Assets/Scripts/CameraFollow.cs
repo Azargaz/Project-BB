@@ -22,5 +22,9 @@ public class CameraFollow : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, target.position.y, -100), smoothnessY);
             transform.position = Vector3.Lerp(transform.position, new Vector3(camPos.x - targetDistance.x, transform.position.y, -100), smoothnessX);
         }
+        else
+        {
+            target = GameObject.FindGameObjectWithTag("Player").transform;
+        }
     }
 }

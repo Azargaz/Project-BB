@@ -12,6 +12,7 @@ public class PlayerCreature : LivingCreature
 
     void Awake()
     {
+        DontDestroyOnLoad(this);
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<Player>();
@@ -127,5 +128,7 @@ public class PlayerCreature : LivingCreature
     void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Destroy(GameManager.instance.gameObject);
+        Destroy(gameObject);
     }
 }

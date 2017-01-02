@@ -118,12 +118,12 @@ public abstract class LivingCreature : MonoBehaviour
         {            
             stats.invincible = true;
             stats.invincibilityTime -= Time.deltaTime;
-            color = new Color(0.9f, 0.9f, 0.9f, 0.8f);
+            color = new Color(color.r, color.g, color.b, 0.7f);
         }
         else if(stats.invincibilityTime <= 0)
         {
             stats.invincible = false;
-            color = new Color(1f, 1f, 1f, 1f);
+            color = new Color(color.r, color.g, color.b, 1f);
         }
 
         GetComponent<SpriteRenderer>().color = color;
