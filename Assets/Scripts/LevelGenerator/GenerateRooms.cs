@@ -275,7 +275,6 @@ public class GenerateRooms : MonoBehaviour
                 Vector2 roomPos = new Vector2(x, y) * roomSize;
                 rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.FindChild("Rooms"));
                 rooms[x, y].name = "R[" + x + ", " + y + "]" + " T[" + thisRoom.roomType + "]";
-                Debug.Log("Test: " + new Vector2(x, y));
 
                 if (new Vector2(x, y) == exitRoom)
                 {
@@ -417,7 +416,8 @@ public class GenerateRooms : MonoBehaviour
                         type5roomCount++;
                     else if (roomToSpawn.GetComponent<Room>().roomType == 6)
                     {
-                        Debug.Log("ROOMTYPE: " + roomType + " POS[" + i + "," + j + "]");
+                        if(debug)
+                            Debug.Log("ROOMTYPE: " + roomType + " POS[" + i + "," + j + "]");
                         numberOfWeaponRooms--;
                     }                        
                 }

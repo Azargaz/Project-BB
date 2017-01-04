@@ -18,7 +18,10 @@ public class StatBars : MonoBehaviour
 	void Update ()
     {
         if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player");
             return;
+        }
         LivingCreature.Statistics stats = player.GetComponent<PlayerCreature>().stats;
         PlayerCreature pc = player.GetComponent<PlayerCreature>();
 

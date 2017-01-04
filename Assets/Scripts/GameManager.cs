@@ -47,7 +47,15 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Debug.Log("Gameover. Your score: " + Score);
+        WeaponPedestalController._playerHasChosenWeapon = false;
         SceneManager.LoadScene(1);
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        WeaponPedestalController._playerHasChosenWeapon = false;
+        Destroy(gameObject);
     }
 
     void OnLevelWasLoaded()

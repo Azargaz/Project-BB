@@ -127,8 +127,7 @@ public class PlayerCreature : LivingCreature
 
     void RestartGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        Destroy(GameManager.instance.gameObject);
+        GameManager.instance.RestartGame();
         Destroy(gameObject);
     }
 }

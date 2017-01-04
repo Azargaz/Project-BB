@@ -6,6 +6,7 @@ public class DamageLivingCreature : MonoBehaviour
 {
     public int damage;
     public bool damagePlayer;
+    public bool ignoreFlying;
     LivingCreature creature;
 
     void Awake()
@@ -30,6 +31,9 @@ public class DamageLivingCreature : MonoBehaviour
 
     void OnTriggerStay2D(Collider2D other)
     {
+        if (ignoreFlying && other.gameObject.layer == 13)
+            return;
+
         if (other.GetComponent<LivingCreature>() != null)
         {
             if (damagePlayer && other.GetComponent<EnemyCreature>() != null)

@@ -9,7 +9,7 @@ public class EnemyCreature : LivingCreature
     [SerializeField]
     GameObject deathParticles;
     Animator anim;
-    GroundEnemyAI controller;
+    EnemyAI controller;
     public int enemySize;
 
     void Awake()
@@ -26,7 +26,7 @@ public class EnemyCreature : LivingCreature
 
         anim = GetComponent<Animator>();
         stats.Initialize();
-        controller = GetComponent<GroundEnemyAI>();
+        controller = GetComponent<EnemyAI>();
     }
 
     protected override void Update()
