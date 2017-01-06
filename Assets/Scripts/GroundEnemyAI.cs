@@ -11,6 +11,7 @@ public class GroundEnemyAI : EnemyAI
     public float movementSpeed;
     float moveSpeed = 6;
 
+    public bool canJump;
     bool jump = false;
 
     float gravity;
@@ -89,7 +90,7 @@ public class GroundEnemyAI : EnemyAI
         if (creature.stats.stunned || creature.stats.animationBusy)
             input.x = 0;
 
-        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left))
+        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left) && canJump)
         {
             jump = true;
         }

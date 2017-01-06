@@ -23,6 +23,7 @@ public class GenerateRooms : MonoBehaviour
     public Monster[] minibosses;
 
     public float chanceToSpawnObstacles;
+    public float chanceToSpawnMonsters;
 
     Vector2 exitRoom;
     List<Vector2> emptySpaces = new List<Vector2>();
@@ -92,6 +93,9 @@ public class GenerateRooms : MonoBehaviour
         {
             for (int j = 0; j < rooms.GetLength(1); j++)
             {
+                if (i == 0 && j == 0)
+                    continue;
+
                 emptySpacesHash.Clear();
                 ignoreFieldsHash.Clear();
                 platformFieldsHash.Clear();
@@ -106,6 +110,10 @@ public class GenerateRooms : MonoBehaviour
 
                 for (int k = 0; k < emptySpaces.Count; k++)
                 {
+                    float roll = Random.value;
+                    if (Random.value > chanceToSpawnObstacles / 100f && chanceToSpawnObstacles > 0)
+                        continue;
+                    
                     if (debug)
                     {
                         Instantiate(test, emptySpaces[k], Quaternion.identity, transform.FindChild("Debug"));
@@ -119,20 +127,14 @@ public class GenerateRooms : MonoBehaviour
                         break;
                     }
 
-                    // "Roll the dice" to check if should spawn the obstacle
-                    float roll = Random.value;
-                    bool spawn = Random.value <= chanceToSpawnObstacles / 100f;
+                    int obstacleToSpawnID = RollWithWeights(obstacles);
+                    GameObject obstacleToSpawn = obstacles[obstacleToSpawnID].objects[Random.Range(0, obstacles[obstacleToSpawnID].objects.Length)];
 
-                    if (spawn)
+                    if (obstacleToSpawn != null && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
                     {
-                        int obstacleToSpawnID = RollWithWeights(obstacles);
-                        GameObject obstacleToSpawn = obstacles[obstacleToSpawnID].objects[Random.Range(0, obstacles[obstacleToSpawnID].objects.Length)];
-
-                        if (obstacleToSpawn != null && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
-                        {
-                            Instantiate(obstacleToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Obstacles"));
-                        }
+                        Instantiate(obstacleToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Obstacles"));
                     }
+                    
                 }
 
                 #endregion
@@ -150,6 +152,10 @@ public class GenerateRooms : MonoBehaviour
                 {
                     for (int k = 0; k < emptySpaces.Count; k++)
                     {
+                        float roll = Random.value;
+                        if (Random.value > chanceToSpawnMonsters / 100f && chanceToSpawnMonsters > 0)
+                            continue;
+
                         #region Spawning monsters
 
                         if (minibossesPerRoom <= 0)
@@ -173,7 +179,12 @@ public class GenerateRooms : MonoBehaviour
 
                             GameObject monsterToSpawn = monsters[monsterToSpawnID].objects[Random.Range(0, monsters[monsterToSpawnID].objects.Length)];
 
-                            if (monsterToSpawn != null && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
+                            if (
+                                monsterToSpawn != null 
+                                && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) 
+                                && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1))
+                                //&& !platformFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1))
+                                )
                             {
                                 Instantiate(monsterToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Mobs"));
                                 monstersPerRoom -= monsters[monsterToSpawnID].value;

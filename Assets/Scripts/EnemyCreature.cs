@@ -14,9 +14,6 @@ public class EnemyCreature : LivingCreature
 
     void Awake()
     {
-        if (name.Contains("Slime") && !name.Contains("MiniBoss"))
-            enemySize = Random.Range(1, 3);
-
         if(enemySize > 1)
         {
             stats.maxHealth += (stats.maxHealth * (enemySize - 1)) / 2;

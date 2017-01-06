@@ -63,7 +63,6 @@ public class HoveringGhostEnemyAI : EnemyAI
                 {
                     creature.stats.animationBusy = true;
                     anim.SetTrigger("Attack");
-                    Animations(input.x);
                     input = Vector2.zero;
                     break;
                 }
@@ -77,8 +76,8 @@ public class HoveringGhostEnemyAI : EnemyAI
 
         #region Movement stuff (gravity, moving)
 
-        Vector2 targetVelocity = input * moveSpeed;
-        velocity = Vector2.SmoothDamp(velocity, targetVelocity, ref velocitySmoothing, accelerationTime, moveSpeed, 0.1f);
+        Vector2 targetVelocity = input.normalized * moveSpeed;
+        velocity = Vector2.SmoothDamp(velocity, targetVelocity, ref velocitySmoothing, accelerationTime, Mathf.Infinity, Time.deltaTime);
         controller.Move(velocity * Time.deltaTime);
 
         #endregion
@@ -88,9 +87,9 @@ public class HoveringGhostEnemyAI : EnemyAI
     {
         Vector2 direction;
 
-        float R = attackRange;
+        float R = followRange - 1;
 
-        float angle = circleTimer;
+        float angle = circleTimer * 2f;
 
         float X = S.x + Mathf.Sin(angle) * R;
         float Y = S.y + Mathf.Cos(angle) * R;
