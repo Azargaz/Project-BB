@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GroundEnemyAI : EnemyAI
 {
+    [Header("GroundEnemy AI")]
     public float jumpHeight = 4;
     public float timeToJumpApex = .4f;
     float accelerationTimeAirborne = .2f;
@@ -19,10 +20,6 @@ public class GroundEnemyAI : EnemyAI
     float velocityXSmoothing;
     int facing = 1;
 
-    Controller2D controller;
-    EnemyCreature creature;
-    Animator anim;
-
     [Header("")]
     public bool debug;
 
@@ -30,9 +27,7 @@ public class GroundEnemyAI : EnemyAI
     {
         base.Start();
 
-        controller = GetComponent<Controller2D>();
-        creature = GetComponent<EnemyCreature>();
-        anim = GetComponent<Animator>();
+        
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
         
         if(creature.enemySize > 1)
@@ -51,6 +46,9 @@ public class GroundEnemyAI : EnemyAI
     protected override void Update ()
     {
         base.Update();
+
+        if (freeze)
+            return;
 
         if (controller.collisions.above || controller.collisions.below)
         {
@@ -90,9 +88,12 @@ public class GroundEnemyAI : EnemyAI
         if (creature.stats.stunned || creature.stats.animationBusy)
             input.x = 0;
 
-        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left) && canJump)
+        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left))
         {
-            jump = true;
+            if (canJump)
+                jump = true;
+            else
+                input.x = 0;
         }
 
         Animations(input.x);

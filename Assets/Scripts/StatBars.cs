@@ -25,16 +25,14 @@ public class StatBars : MonoBehaviour
         LivingCreature.Statistics stats = player.GetComponent<PlayerCreature>().stats;
         PlayerCreature pc = player.GetComponent<PlayerCreature>();
 
-        float scale = Mathf.Round(1920f / Screen.width);
-
         switch (chooseStat)
         {
             case Stat.HP:
                 {
                     RectTransform rt = GetComponent<RectTransform>();
-                    float stat = 0.6f * stats.maxHealth + 200f;
-                    rt.sizeDelta = Scale(rt.sizeDelta, scale, stat, false);
-                    bg.sizeDelta = Scale(bg.sizeDelta, scale, stat, true);
+                    float stat = stats.maxHealth;
+                    rt.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
+                    bg.sizeDelta = new Vector2(stat + 2, rt.sizeDelta.y + 2);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, (float) stats.curHealth / stats.maxHealth, 0.15f);
                     break;
@@ -42,9 +40,9 @@ public class StatBars : MonoBehaviour
             case Stat.Stamina:
                 {
                     RectTransform rt = GetComponent<RectTransform>();
-                    float stat = 0.6f * stats.maxStamina + 200f;
-                    rt.sizeDelta = Scale(rt.sizeDelta, scale, stat, false);
-                    bg.sizeDelta = Scale(bg.sizeDelta, scale, stat, true);
+                    float stat = stats.maxStamina;
+                    rt.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
+                    bg.sizeDelta = new Vector2(stat + 2, rt.sizeDelta.y + 2);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, stats.curStamina / stats.maxStamina, 0.15f);                    
                     break;
@@ -52,20 +50,12 @@ public class StatBars : MonoBehaviour
             case Stat.RH:
                 {
                     RectTransform rt = GetComponent<RectTransform>();
-                    float stat = 0.6f * stats.maxHealth + 200f;
-                    rt.sizeDelta = Scale(rt.sizeDelta, scale, stat, false);
+                    float stat = stats.maxHealth;
+                    rt.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, (float) (stats.curHealth + pc.healthToRestore) / stats.maxHealth, 0.15f);
                     break;
                 }
         }
 	}
-
-    Vector2 Scale(Vector2 deltasize, float scale, float stat, bool bg)
-    {
-        if (!bg)
-            return new Vector2(stat / scale, deltasize.y);
-        else
-            return new Vector2(stat / scale + 2, deltasize.y);
-    }
 }

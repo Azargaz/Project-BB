@@ -12,10 +12,6 @@ public class HoveringGhostEnemyAI : EnemyAI
     Vector2 velocitySmoothing;
     int facing = 1;
 
-    Controller2D controller;
-    EnemyCreature creature;
-    Animator anim;
-
     [Header("")]
     public bool debug;
 
@@ -23,9 +19,6 @@ public class HoveringGhostEnemyAI : EnemyAI
     {
         base.Start();
 
-        controller = GetComponent<Controller2D>();
-        creature = GetComponent<EnemyCreature>();
-        anim = GetComponent<Animator>();
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
 
         if (creature.enemySize > 1)
@@ -37,6 +30,9 @@ public class HoveringGhostEnemyAI : EnemyAI
     protected override void Update()
     {
         base.Update();
+
+        if (freeze)
+            return;
 
         Vector2 input = Vector2.zero;
         input = playerDirection;

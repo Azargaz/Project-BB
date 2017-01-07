@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
-{
+{    
     protected enum EnemyState { idle, stop, walk, attack };
     protected EnemyState currentState = EnemyState.idle;
 
+    [Header("Enemy AI")]
     public float searchPlayerInterval = 0.05f;
     float searchPlayerDelay = 0;
     public float range = 10f;
@@ -15,6 +16,7 @@ public class EnemyAI : MonoBehaviour
     public float attackCooldown = 1f;
     float attackTimer;
     public float minDistanceFromPlayer = 0.5f;
+    public bool attacked;
 
     [HideInInspector]
     public Vector3 velocity;
@@ -23,18 +25,36 @@ public class EnemyAI : MonoBehaviour
     protected Vector2 playerDirection = Vector2.zero; 
     protected Vector2 playerPos;
 
+    protected Animator anim;
+    protected Controller2D controller;
+    protected EnemyCreature creature;
+
     [Header("")]
-    bool debugAI;
+    public bool freeze;
+    public bool debugAI;
 
     protected virtual void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
         playerPos = player.transform.position;
-        attackTimer = attackCooldown;        
+        attackTimer = attackCooldown;
+        controller = GetComponent<Controller2D>();
+        creature = GetComponent<EnemyCreature>();
+        anim = GetComponent<Animator>();
     }
 
     protected virtual void Update()
     {
+        if (freeze)
+        {
+            anim.speed = 0;
+            return;
+        }
+        else
+        {
+            anim.speed = 1;
+        }
+
         currentState = SearchPlayer();
 
         // Attack & SearchPlayer cooldown
@@ -70,12 +90,12 @@ public class EnemyAI : MonoBehaviour
         }
 
         // If player is in attack range, attack - if it's on cooldown, stop
-        if (attackTimer <= 0)
+        if (attackTimer <= 0 && !attacked)
         {
             if (distanceToPlayer <= attackRange)
             {
                 playerDirection = new Vector2(playerPosDifference.x > 0 ? 1 : -1, playerPosDifference.y > 0 ? 1 : -1);
-                attackTimer = attackCooldown;
+                attacked = true;
                 return EnemyState.attack;
             }
             else
@@ -103,5 +123,11 @@ public class EnemyAI : MonoBehaviour
                 return EnemyState.stop;
             }
         }
+    }
+
+    void AnimationAttackOnCD()
+    {
+        attackTimer = attackCooldown;
+        attacked = false;
     }
 }

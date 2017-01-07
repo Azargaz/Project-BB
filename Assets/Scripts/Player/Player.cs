@@ -36,6 +36,7 @@ public class Player : MonoBehaviour
     Transform trail;
     Animator anim;
     public int facing = 1;
+    public bool freeze;
 
     void Start()
     {
@@ -55,6 +56,9 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (freeze)
+            return;
+
         if(transform.position.y < -100)
         {
             transform.position = Vector2.one;
@@ -76,8 +80,9 @@ public class Player : MonoBehaviour
         // Attacking  
         if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.weapons[weaponM.currentWeapon].useStaminaCost)
         {
+            WeaponManager.wp.RollCritical();
             anim.SetFloat("AttackId", (float)weaponM.weapons[weaponM.currentWeapon].attackType / 10f);
-            anim.SetTrigger("Attack");
+            anim.SetTrigger("Attack");            
         }
 
         #region Animation, stunned, animationBusy, flipping sprites
@@ -168,7 +173,7 @@ public class Player : MonoBehaviour
     {
         AnimationDrainStaminaDash();
         AnimationDashStep();
-        AnimationInvincibility(0.1f);
+        creature.AnimationInvincibility(0.1f);
     }
 
     void AnimationDrainStamina()
@@ -196,12 +201,20 @@ public class Player : MonoBehaviour
             GameObject swing = weaponM.equippedWeapon.aoeObject[hitCount];
             swing.transform.GetChild(0).GetComponent<Animator>().SetTrigger("Swing");
             swing.transform.localScale = new Vector2(facing, 1);            
-        }   
-    }
 
-    void AnimationInvincibility(float dur)
-    {
-        stats.Invincibility(dur);
+            if(weaponM.equippedWeapon.crit)
+            {
+                Color swingColor = swing.GetComponentInChildren<SpriteRenderer>().color;
+                swingColor = new Color(0.9f, 0, 0);
+                swing.GetComponentInChildren<SpriteRenderer>().color = swingColor;
+            }
+            else
+            {
+                Color swingColor = swing.GetComponentInChildren<SpriteRenderer>().color;
+                swingColor = new Color(1, 1, 1);
+                swing.GetComponentInChildren<SpriteRenderer>().color = swingColor;
+            }
+        }   
     }
 
     void AnimationDashStep()
@@ -227,22 +240,6 @@ public class Player : MonoBehaviour
         }
         else
             velocity.x = attackStepLength * facing;
-
-        Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
-
-        if (transform.FindChild("Hitbox") != null)
-        {
-            if (facing > 0)
-            {
-                hitboxPos.x = Mathf.Abs(hitboxPos.x);
-            }
-            else if (facing < 0)
-            {
-                hitboxPos.x = -Mathf.Abs(hitboxPos.x);
-            }
-
-            transform.FindChild("Hitbox").localPosition = hitboxPos;
-        }
 
         controller.Move(velocity * Time.deltaTime);
     }

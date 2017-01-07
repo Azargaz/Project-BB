@@ -10,10 +10,11 @@ public class EnemyCreature : LivingCreature
     GameObject deathParticles;
     Animator anim;
     EnemyAI controller;
+    public int Score;
     public int enemySize;
 
     void Awake()
-    {
+    {        
         if(enemySize > 1)
         {
             stats.maxHealth += (stats.maxHealth * (enemySize - 1)) / 2;
@@ -24,6 +25,11 @@ public class EnemyCreature : LivingCreature
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<EnemyAI>();
+    }
+
+    void Start()
+    {
+        GameManager.instance.monsters.Add(gameObject);
     }
 
     protected override void Update()
@@ -46,7 +52,10 @@ public class EnemyCreature : LivingCreature
         if (!stats.stunned)
         {
             if (anim != null)
-                anim.SetTrigger("Stunned");            
+                anim.SetTrigger("Stunned");
+
+            if(controller != null)
+                controller.attacked = false;
 
             stats.stunned = true;
         }
@@ -58,7 +67,7 @@ public class EnemyCreature : LivingCreature
         }
 
         // Knockback
-        if (knockbackPower != 0 && dmgSource != null && controller != null)
+        if (knockbackPower != 0 && dmgSource != null && controller != null && !stats.immovable)
         {
             float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
             float velocityX = (direction > 0 ? -1 : 1) * knockbackPower;
@@ -79,7 +88,7 @@ public class EnemyCreature : LivingCreature
             Destroy(clone, 3f);
         }
 
-        GameManager.Score++;
+        GameManager.Score += Score;
         Destroy(gameObject);
     }
 }

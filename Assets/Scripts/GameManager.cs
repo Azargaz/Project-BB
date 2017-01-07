@@ -10,6 +10,8 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
     public GameObject playerPrefab;
     public static GameObject player;
+    public List<GameObject> monsters = new List<GameObject>();
+    public List<GameObject> flyingProjectiles;
 
     void Awake()
     {
@@ -19,7 +21,7 @@ public class GameManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this);
 
-        if (player == null)
+        if (player == null && SceneManager.GetActiveScene().buildIndex == 1)
         {
             player = Instantiate(playerPrefab);
             player.transform.position = new Vector3(0, 6, 0);
@@ -28,17 +30,17 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 1)
+        if (SceneManager.GetActiveScene().buildIndex == 2)
         {
             if(Input.GetKeyDown(KeyCode.Return))
             {
-                SceneManager.LoadScene(0);
+                SceneManager.LoadScene(1);
                 if(player != null)
                     Destroy(player);
                 Destroy(gameObject);
             }            
         }
-        else
+        else if (SceneManager.GetActiveScene().buildIndex == 1)
         {
             GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text = "Score: " + Score;
         }
@@ -48,30 +50,46 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Gameover. Your score: " + Score);
         WeaponPedestalController._playerHasChosenWeapon = false;
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
     public void RestartGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene(0);
         WeaponPedestalController._playerHasChosenWeapon = false;
         Destroy(gameObject);
     }
 
+    public void StartGame()
+    {
+        SceneManager.LoadScene(1);
+    }
+
     void OnLevelWasLoaded()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 0)
-            return;
+        if (SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            if (player == null)
+            {
+                player = Instantiate(playerPrefab);
+                player.transform.position = new Vector3(0, 6, 0);
+            }
 
-        if (Score > 0)
-        {
-            GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text += Score;
-            Score = 0;
+            return;
         }
-        else
+        
+        if(SceneManager.GetActiveScene().buildIndex == 2)
         {
-            GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text = @"Game over!
+            if (Score > 0)
+            {
+                GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text += Score;
+                Score = 0;
+            }
+            else
+            {
+                GameObject.FindGameObjectWithTag("Score").GetComponent<Text>().text = @"Game over!
 Your score: 0";
+            }
         }
     }
 }

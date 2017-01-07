@@ -24,6 +24,7 @@ public abstract class LivingCreature : MonoBehaviour
         public bool animationBusy; // for animations
         public bool alive;
         public bool invincible;
+        public bool immovable;
 
         public float defaultInvincibilityDuration;        
 
@@ -84,7 +85,7 @@ public abstract class LivingCreature : MonoBehaviour
             if(duration == 0)
                 duration = defaultInvincibilityDuration;
 
-            invincibilityTime = duration;
+            invincibilityTime += duration;
         }
     }
 
@@ -166,7 +167,22 @@ public abstract class LivingCreature : MonoBehaviour
     protected void AnimationBusyEnd()
     {
         stats.animationBusy = false;
-    } 
+    }
+
+    protected void AnimationImmovableStart()
+    {
+        stats.immovable = true;
+    }
+
+    protected void AnimationImmovableEnd()
+    {
+        stats.immovable = false;
+    }
+
+    public void AnimationInvincibility(float dur)
+    {
+        stats.Invincibility(dur);
+    }
 
     #endregion
 }

@@ -68,7 +68,7 @@ public class WeaponPedestalController : MonoBehaviour
 
     void Start ()
     {
-        weaponId = Random.Range(1, 3);
+        weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
 	}
 
     void Update()
