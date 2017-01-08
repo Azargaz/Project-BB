@@ -8,6 +8,8 @@ public class WeaponManager : MonoBehaviour
     [System.Serializable]
     public class Weapon
     {
+        [HideInInspector]
+        public int id;
         public string name;
         public int baseDamage;        
         public int criticalDamage;
@@ -15,12 +17,14 @@ public class WeaponManager : MonoBehaviour
         public int useStaminaCost;
         [Range(0.0f, 100.0f)]
         public float criticalChance;
-        public float criticalMultiplier;
+        public float criticalMultiplier = 1.5f;
         public bool crit;
         public Sprite sprite;
         public GameObject[] aoeObject;
-        public enum AnimationType { vertical, horizontal, command, horizontal_vertical };
+        public enum AnimationType { horizontal, vertical, command, horizontal_vertical, dash };
         public AnimationType attackType;
+        public int comboHits;
+        public float attackSpeed = 1;
 
         public void Init()
         {
@@ -52,6 +56,7 @@ public class WeaponManager : MonoBehaviour
         for (int i = 0; i < weapons.Length; i++)
         {
             weapons[i].Init();
+            weapons[i].id = i;
         }
 
         wp = this;

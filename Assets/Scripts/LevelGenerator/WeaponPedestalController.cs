@@ -1,21 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class WeaponPedestalController : MonoBehaviour
-{
-    public int weaponId;
-    int weaponIdStored;
-    public SpriteRenderer weaponSprite;
-    public GameObject player;
-    public GameObject prompt;
-    public Text promptText;
-    public static bool _playerHasChosenWeapon;
-    bool playerHasChosenWeapon;
+{   
     bool minibossSpawned = false;
+    GameObject lastWeaponPedestal;
     public Monster[] minibosses;
     GameObject miniboss;
+
+    [HideInInspector]
+    public List<WeaponPedestal> weaponPedestals;
+    List<int> weaponIds = new List<int>();
+    public bool initializeWeaponPedestals;
+    public static WeaponPedestalController WPC;
 
     [System.Serializable]
     public class Monster
@@ -25,17 +23,94 @@ public class WeaponPedestalController : MonoBehaviour
         public int chanceToSpawnWeight;
     }
 
-    public bool saveThisPedestal;
-
-    void Deactivate()
+    void Awake()
     {
-        if(_playerHasChosenWeapon && !saveThisPedestal)
-        {
-            if (prompt.activeInHierarchy)
-                prompt.SetActive(false);
+        WPC = this;
+    }
 
-            transform.FindChild("Weapon").gameObject.SetActive(false);
-        }        
+    public void Activate(WeaponPedestal source)
+    {
+        for (int i = 0; i < weaponPedestals.Count; i++)
+        {
+            if(weaponPedestals[i] != source)
+            {
+                Destroy(weaponPedestals[i].prompt);
+                Destroy(weaponPedestals[i].weaponPedestalSpriteRenderer);
+                Destroy(weaponPedestals[i]);
+                weaponPedestals.RemoveAt(i);
+                i--;
+            }
+            else
+            {
+                source.playerHasChosenWeapon = true;
+                lastWeaponPedestal = source.gameObject;
+            }
+        }
+    }
+
+    void Update()
+    {
+        if(weaponPedestals.Count > 0 && !initializeWeaponPedestals)
+        {
+            initializeWeaponPedestals = true;
+            weaponIds.Clear();
+
+            for (int i = 0; i < WeaponManager.wp.weapons.Length; i++)
+            {
+                if (WeaponManager.wp.equippedWeapon.id == i)
+                    continue;
+
+                weaponIds.Add(i);
+            }
+
+            for (int i = 0; i < weaponPedestals.Count; i++)
+            {
+                int ID;
+
+                if (weaponIds.Count > 0)
+                {
+                    ID = Random.Range(0, weaponIds.Count);
+
+                    weaponPedestals[i].weaponId = weaponIds[ID];
+
+                    weaponIds.RemoveAt(ID);
+                }
+                else
+                {
+                    weaponPedestals[i].weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
+                }
+            }
+        }
+
+        if(lastWeaponPedestal != null)
+        {
+            if (!minibossSpawned)
+            {
+                minibossSpawned = true;
+                int rollMiniboss = RollWithWeights(minibosses);
+                GameObject minibossToSpawn = minibosses[rollMiniboss].objects[Random.Range(0, minibosses[rollMiniboss].objects.Length)];
+                miniboss = Instantiate(minibossToSpawn, lastWeaponPedestal.transform.position, Quaternion.identity);
+
+                Room thisRoom = lastWeaponPedestal.GetComponentInParent<Room>();
+                miniboss.transform.parent = thisRoom.transform;
+
+                thisRoom.BlockRoom();
+            }
+            else if (minibossSpawned)
+            {
+                if (miniboss == null)
+                {
+                    Room thisRoom = lastWeaponPedestal.GetComponentInParent<Room>();
+                    thisRoom.UnblockRoom();
+                }
+            }
+        }
+    }
+
+    void OnLevelWasLoaded()
+    {
+        initializeWeaponPedestals = false;
+        minibossSpawned = false;
     }
 
     int RollWithWeights(Monster[] array)
@@ -64,87 +139,5 @@ public class WeaponPedestalController : MonoBehaviour
         }
 
         return returnInt;
-    }
-
-    void Start ()
-    {
-        weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
-	}
-
-    void Update()
-    {
-        if(playerHasChosenWeapon != _playerHasChosenWeapon)
-        {
-            Deactivate();
-            playerHasChosenWeapon = _playerHasChosenWeapon;
-        }
-
-        if (_playerHasChosenWeapon && !saveThisPedestal)
-        {            
-            return;
-        }
-
-        if (!minibossSpawned && saveThisPedestal)
-        {
-            minibossSpawned = true;
-            int rollMiniboss = RollWithWeights(minibosses);
-            GameObject minibossToSpawn = minibosses[rollMiniboss].objects[Random.Range(0, minibosses[rollMiniboss].objects.Length)];
-            miniboss = Instantiate(minibossToSpawn, transform.position, Quaternion.identity);
-
-            Room thisRoom = GetComponentInParent<Room>();
-            thisRoom.BlockRoom();
-        }
-        else if(minibossSpawned)
-        {
-            if(miniboss == null)
-            {
-                Room thisRoom = GetComponentInParent<Room>();
-                thisRoom.UnblockRoom();
-            }
-        }
-
-        if (weaponSprite != null && WeaponManager.wp.weapons[weaponId] != null)
-        {
-            weaponSprite.sprite = WeaponManager.wp.weapons[weaponId].sprite;
-            promptText.text = (_playerHasChosenWeapon ? "" : "Choose one weapon and defeat powerful monster to escape\n") + WeaponManager.wp.weapons[weaponId].name + (_playerHasChosenWeapon ? "\nPress Q to pickup" : "\nPress Q to pickup");
-        }
-
-        if(player != null)
-        {
-            if(Input.GetButtonDown("PickupWeapon") && !player.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
-            {
-                SwapWeapon();
-                saveThisPedestal = true;
-                _playerHasChosenWeapon = true;
-            }
-        }
-    }
-
-    void SwapWeapon()
-    {
-        if (player == null)
-            return;
-
-        weaponIdStored = player.GetComponentInChildren<WeaponManager>().currentWeapon;
-        player.GetComponentInChildren<WeaponManager>().currentWeapon = weaponId;
-        weaponId = weaponIdStored;
-    }
-
-	void OnTriggerEnter2D(Collider2D other)
-    {
-        if(other.gameObject.layer == 8 && !(_playerHasChosenWeapon && !saveThisPedestal))
-        {
-            player = other.gameObject;
-            prompt.SetActive(true);
-        }
-    }
-
-    void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.gameObject.layer == 8 && !(_playerHasChosenWeapon && !saveThisPedestal))
-        {
-            player = null;
-            prompt.SetActive(false);
-        }
-    }
+    }    
 }

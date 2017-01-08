@@ -15,6 +15,7 @@ public class PlayerCreature : LivingCreature
     GameObject timeStoppedCounter;
     float timeStoppedTimeLeft;
     int stoppedMobsCount = 0;
+    int stoppedProjectilesCount = 0;
 
     void Awake()
     {
@@ -34,30 +35,17 @@ public class PlayerCreature : LivingCreature
 
         if(timeStoppedCounter == null)
             timeStoppedCounter = GameObject.FindGameObjectWithTag("TimeStop");
-
-        timeStoppedCounter.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";       
-        Vector2 curSizeDelta = timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta;
-        float smooth = 0.1f;
-        //float curFill = timeStoppedCounter.GetComponentInChildren<Image>().fillAmount;
-        //timeStoppedCounter.GetComponentInChildren<Image>().fillAmount = timeStopped ? Mathf.Lerp(curFill, 1, smooth) : Mathf.Lerp(curFill, 0, smooth);
-        timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta = timeStopped ? Vector2.Lerp(curSizeDelta, new Vector2(Screen.width * 2, Screen.width * 2), smooth) : Vector2.Lerp(curSizeDelta, Vector2.zero, smooth);
-
-        if(timeStopped)
+        else
         {
-            List<GameObject> mobs = GameManager.instance.monsters;
+            timeStoppedCounter.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
+            Vector2 curSizeDelta = timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta;
+            float smooth = 0.1f;
+            timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta = timeStopped ? Vector2.Lerp(curSizeDelta, new Vector2(Screen.width * 2, Screen.width * 2), smooth) : Vector2.Lerp(curSizeDelta, Vector2.zero, smooth);
+        }
 
-            if(stoppedMobsCount < mobs.Count)
-            {
-                for (int i = 0; i < mobs.Count; i++)
-                {
-                    if (mobs[i] != null && mobs[i].GetComponent<EnemyAI>() != null)
-                    {
-                        mobs[i].GetComponent<EnemyAI>().freeze = timeStopped;
-                    }
-                }
-
-                stoppedMobsCount = mobs.Count;
-            }            
+        if (timeStopped)
+        {
+            StopMobsAndProjectiles(true);
         }
 
         if (Input.GetKeyDown(KeyCode.E))
@@ -75,17 +63,7 @@ public class PlayerCreature : LivingCreature
                 timeStoppedTimeLeft = 0;
             }
 
-            List<GameObject> mobs = GameManager.instance.monsters;
-
-            for (int i = 0; i < mobs.Count; i++)
-            {
-                if (mobs[i] != null && mobs[i].GetComponent<EnemyAI>() != null)
-                {
-                    mobs[i].GetComponent<EnemyAI>().freeze = timeStopped;
-                }
-            }
-
-            stoppedMobsCount = mobs.Count;
+            StopMobsAndProjectiles(false);
         }
 
         if(timeStoppedTimeLeft > 0)
@@ -98,15 +76,7 @@ public class PlayerCreature : LivingCreature
             {
                 timeStopped = false;
 
-                List<GameObject> mobs = GameManager.instance.monsters;
-
-                for (int i = 0; i < mobs.Count; i++)
-                {
-                    if (mobs[i] != null && mobs[i].GetComponent<EnemyAI>() != null)
-                    {
-                        mobs[i].GetComponent<EnemyAI>().freeze = timeStopped;
-                    }
-                }
+                StopMobsAndProjectiles(false);
             }
         }
 
@@ -155,6 +125,44 @@ public class PlayerCreature : LivingCreature
 
         #endregion
     }
+
+    #region Time stop
+
+    void StopMobsAndProjectiles(bool count)
+    {
+        List<GameObject> mobs = GameManager.instance.monsters;
+        List<GameObject> projectiles = GameManager.instance.flyingProjectiles;
+
+        if ((stoppedMobsCount < mobs.Count && count) || !count)
+        {
+            for (int i = 0; i < mobs.Count; i++)
+            {
+                if (mobs[i] != null && mobs[i].GetComponent<EnemyAI>() != null)
+                {
+                    mobs[i].GetComponent<EnemyAI>().freeze = timeStopped;
+                }
+            }
+
+            if(timeStopped)
+                stoppedMobsCount = mobs.Count;
+        }
+
+        if ((stoppedProjectilesCount < projectiles.Count && count) || !count)
+        {
+            for (int i = 0; i < projectiles.Count; i++)
+            {
+                if (projectiles[i] != null && projectiles[i].GetComponent<Projectile>() != null)
+                {
+                    projectiles[i].GetComponent<Projectile>().freeze = timeStopped;
+                }
+            }
+
+            if (timeStopped)
+                stoppedProjectilesCount = projectiles.Count;
+        }
+    }
+
+    #endregion
 
     #region Restore health
 

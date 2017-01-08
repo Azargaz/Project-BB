@@ -21,7 +21,6 @@ public class ExitController : MonoBehaviour
 
     void GoToTheNextLevel()
     {
-        WeaponPedestalController._playerHasChosenWeapon = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         GameManager.player.transform.position = new Vector3(0, 6, 0);
     }

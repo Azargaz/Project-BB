@@ -5,14 +5,12 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour
 {
-    [Header("Dashing and attacking")]
+    [Header("Dashing")]
     public int dashCost;
     [Range(0, 100)]
     public float dashLength = 4;
     [Range(0, 100)]
     public float trailLength = 4;
-    [Range(0, 100)]
-    public float attackStepLength = 4;
 
     [Header("Movement")]
     public float maxJumpHeight = 4;
@@ -81,7 +79,8 @@ public class Player : MonoBehaviour
         if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.weapons[weaponM.currentWeapon].useStaminaCost)
         {
             WeaponManager.wp.RollCritical();
-            anim.SetFloat("AttackId", (float)weaponM.weapons[weaponM.currentWeapon].attackType / 10f);
+            anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
+            anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (hitCount > 0 ? hitCount : 0)) / 10f);            
             anim.SetTrigger("Attack");            
         }
 
@@ -188,19 +187,32 @@ public class Player : MonoBehaviour
         stats.DelayStaminaRegen();
     }
 
-    void AnimationAttackSlash(int hitCount)
+    int hitCount = 0;
+
+    void AnimationAttackSlash()
     {
-        if (hitCount < 0)
-            return;
+        int numberOfHits = weaponM.equippedWeapon.comboHits;
 
-        if (weaponM.equippedWeapon.aoeObject.Length < hitCount)
-            AnimationAttackSlash(hitCount - 1);
+        if (weaponM.equippedWeapon.aoeObject.Length < hitCount - 1)
+            hitCount = 0;
 
-        if (weaponM.equippedWeapon.aoeObject[hitCount] != null)
+        if (weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0] != null)
         {
-            GameObject swing = weaponM.equippedWeapon.aoeObject[hitCount];
-            swing.transform.GetChild(0).GetComponent<Animator>().SetTrigger("Swing");
-            swing.transform.localScale = new Vector2(facing, 1);            
+            GameObject swing = weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0];
+            Animator swingAnim = swing.transform.GetChild(0).GetComponent<Animator>();
+            swingAnim.SetTrigger("Swing");
+            swingAnim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
+            swing.transform.localScale = new Vector2(facing, 1);
+
+            if (numberOfHits > 0)
+            {
+                hitCount++;
+
+                if (hitCount > numberOfHits)
+                    hitCount = 0;                    
+            }
+            else
+                hitCount = 0;
 
             if(weaponM.equippedWeapon.crit)
             {
@@ -229,17 +241,11 @@ public class Player : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }    
 
-    void AnimationAttackStep()
+    void AnimationAttackStep(int distance)
     {
         float input = Input.GetAxisRaw("Horizontal");
-
-        if (input != 0)
-        {
-            velocity.x = attackStepLength * input;
-            facing = input < 0 ? -1 : 1;
-        }
-        else
-            velocity.x = attackStepLength * facing;
+               
+        velocity.x = distance * facing;
 
         controller.Move(velocity * Time.deltaTime);
     }

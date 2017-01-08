@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DamageLivingCreature : MonoBehaviour
-{
-    public int damage;
+{        
+    [Header("Damage living creatures")]
     public bool damagePlayer;
     public bool ignoreFlying;
-    LivingCreature creature;
 
-    void Awake()
+    public int damage;
+    [HideInInspector]
+    public LivingCreature creature;
+
+    protected virtual void Awake()
     {
         if (transform.root.GetComponent<LivingCreature>() != null)
         {
@@ -21,7 +24,7 @@ public class DamageLivingCreature : MonoBehaviour
         }
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if(creature != null)
         {
@@ -29,32 +32,33 @@ public class DamageLivingCreature : MonoBehaviour
         }
     }
 
-    void OnTriggerStay2D(Collider2D other)
+    protected virtual void OnTriggerStay2D(Collider2D other)
     {
         if (ignoreFlying && other.gameObject.layer == 13)
             return;
 
         if (other.GetComponent<LivingCreature>() != null)
         {
+            if(other.GetComponent<LivingCreature>() == creature)
+                return;
+
             if (damagePlayer && other.GetComponent<EnemyCreature>() != null)
                 return;
 
             LivingCreature target = other.GetComponent<LivingCreature>();
-            LivingCreature thisObject;
 
-            if (transform.parent.GetComponent<LivingCreature>() != null)
-                thisObject = transform.parent.GetComponent<LivingCreature>();
-            else if (transform.GetComponent<LivingCreature>() != null)
-                thisObject = transform.GetComponent<LivingCreature>();
-            else
-                thisObject = transform.root.GetComponent<LivingCreature>();
+            bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
 
-            bool hit = target.Damage(damage, thisObject, thisObject == null ? 0 : thisObject.stats.knockbackPower);
+            if (hit)
+                AfterHit();
+        }
+    }
 
-            if(transform.root.GetComponent<PlayerCreature>() != null && hit)
-            {
-                transform.root.GetComponent<PlayerCreature>().RestoreHealthAfterAttack();
-            }
+    protected virtual void AfterHit()
+    {
+        if (transform.root.GetComponent<PlayerCreature>() != null)
+        {
+            transform.root.GetComponent<PlayerCreature>().RestoreHealthAfterAttack();
         }
     }
 }
