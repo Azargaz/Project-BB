@@ -29,6 +29,9 @@ public class PlayerCreature : LivingCreature
 
     protected override void Update()
     {
+        if (!stats.alive)
+            return;
+
         base.Update();
 
         #region Time stop
@@ -232,8 +235,9 @@ public class PlayerCreature : LivingCreature
     public override void Kill()
     {
         base.Kill();
+        anim.SetTrigger("Death");
         Debug.LogError("YOU DIED");
-        GameManager.instance.GameOver();
+        StartCoroutine(GameManager.instance.GameOver());
     }
 
     void RestartGame()

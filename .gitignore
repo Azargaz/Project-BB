@@ -4,3 +4,5 @@ Library/
 Yesdev.Editor.csproj
 Yesdev.csproj
 Yesdev.sln
+Temp/TarGZ/
+Temp/

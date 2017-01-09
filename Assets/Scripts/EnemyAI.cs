@@ -55,6 +55,9 @@ public class EnemyAI : MonoBehaviour
             anim.speed = 1;
         }
 
+        if (!creature.stats.alive)
+            return;
+
         currentState = SearchPlayer();
 
         // Attack & SearchPlayer cooldown

@@ -37,28 +37,31 @@ public class DamageLivingCreature : MonoBehaviour
         if (ignoreFlying && other.gameObject.layer == 13)
             return;
 
-        if (other.GetComponent<LivingCreature>() != null)
+        if (other.GetComponent<LivingCreature>() == null)
+            return;
+
+        LivingCreature target = other.GetComponent<LivingCreature>();
+
+        if (target == creature)
+            return;
+
+        if (target is EnemyCreature && damagePlayer)
         {
-            if(other.GetComponent<LivingCreature>() == creature)
-                return;
-
-            if (damagePlayer && other.GetComponent<EnemyCreature>() != null)
-                return;
-
-            LivingCreature target = other.GetComponent<LivingCreature>();
-
-            bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
-
-            if (hit)
-                AfterHit();
+            return;
         }
+
+        bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
+
+        if (hit)
+            AfterHit();
     }
 
     protected virtual void AfterHit()
     {
-        if (transform.root.GetComponent<PlayerCreature>() != null)
+        if (creature is PlayerCreature)
         {
-            transform.root.GetComponent<PlayerCreature>().RestoreHealthAfterAttack();
+            PlayerCreature playerCreature = creature as PlayerCreature;
+            playerCreature.RestoreHealthAfterAttack();
         }
     }
 }

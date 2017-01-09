@@ -34,11 +34,6 @@ public class SpawnProjectile : MonoBehaviour
             projectile.creature = transform.parent.GetComponent<LivingCreature>();
         }
 
-        if(transform.root.GetComponent<PlayerCreature>() != null)
-        {
-            projectile.source = transform.root.gameObject;
-        }
-
         projectile.input.x = transform.parent.localScale.x;
         
     }

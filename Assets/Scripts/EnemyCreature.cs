@@ -89,6 +89,10 @@ public class EnemyCreature : LivingCreature
         }
 
         GameManager.Score += Score;
-        Destroy(gameObject);
+
+        if (anim != null)
+            anim.SetTrigger("Death");
+        else
+            Destroy(gameObject);
     }
 }

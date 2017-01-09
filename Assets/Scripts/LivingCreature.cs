@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class LivingCreature : MonoBehaviour
 {
@@ -90,6 +91,7 @@ public abstract class LivingCreature : MonoBehaviour
     }
 
     public Statistics stats = new Statistics();
+    public GameObject damageDisplay;
 
     protected virtual void Update()
     {
@@ -141,6 +143,18 @@ public abstract class LivingCreature : MonoBehaviour
         }
         else
         {
+            if (damageDisplay != null)
+            {
+                GameObject clone = Instantiate(damageDisplay, transform.position, Quaternion.identity);
+                
+                if(dmgSource is PlayerCreature)
+                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString() + (WeaponManager.wp.equippedWeapon.crit ? "!" : "");
+                else
+                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString();
+
+                clone.GetComponent<Animator>().SetTrigger("Display");
+                Destroy(clone, 1f);
+            }
             stats.curHealth -= damageTaken;
             stats.Invincibility();
             return true;
@@ -184,5 +198,9 @@ public abstract class LivingCreature : MonoBehaviour
         stats.Invincibility(dur);
     }
 
+    void AnimationDeath()
+    {
+        Destroy(gameObject);
+    }
     #endregion
 }

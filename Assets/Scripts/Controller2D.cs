@@ -17,6 +17,8 @@ public class Controller2D : MonoBehaviour
     RaycastOrigins raycastOrigins;
     public CollisionInfo collisions;
     public bool player;
+    [HideInInspector]
+    public bool jumpDown;
 
     void Start()
     {
@@ -84,9 +86,16 @@ public class Controller2D : MonoBehaviour
             if (hit)
             {
                 //Platforms
-                if(player)                
-                    if ((hit.collider.gameObject.layer == 11 && directionY == 1) || (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f))
+                if (player)
+                    if (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f)
                         continue;
+
+                if (!player)
+                    if (hit.collider.gameObject.layer == 11 && jumpDown)
+                        continue;
+
+                if ((hit.collider.gameObject.layer == 11 && directionY == 1))
+                    continue;
                 
 
                 velocity.y = (hit.distance - skinWidth) * directionY;

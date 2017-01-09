@@ -48,38 +48,41 @@ public class WeaponPedestalController : MonoBehaviour
         }
     }
 
+    void Initialize()
+    {  
+        for (int i = 0; i < WeaponManager.wp.weapons.Length; i++)
+        {
+            if (WeaponManager.wp.equippedWeapon.id == i)
+                continue;
+
+            weaponIds.Add(i);
+        }
+
+        for (int i = 0; i < weaponPedestals.Count; i++)
+        {
+            int ID;
+
+            if (weaponIds.Count > 0)
+            {
+                ID = Random.Range(0, weaponIds.Count);
+
+                weaponPedestals[i].weaponId = weaponIds[ID];
+
+                weaponIds.RemoveAt(ID);
+            }
+            else
+            {
+                weaponPedestals[i].weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
+            }
+        }
+    }
+
     void Update()
     {
         if(weaponPedestals.Count > 0 && !initializeWeaponPedestals)
         {
             initializeWeaponPedestals = true;
-            weaponIds.Clear();
-
-            for (int i = 0; i < WeaponManager.wp.weapons.Length; i++)
-            {
-                if (WeaponManager.wp.equippedWeapon.id == i)
-                    continue;
-
-                weaponIds.Add(i);
-            }
-
-            for (int i = 0; i < weaponPedestals.Count; i++)
-            {
-                int ID;
-
-                if (weaponIds.Count > 0)
-                {
-                    ID = Random.Range(0, weaponIds.Count);
-
-                    weaponPedestals[i].weaponId = weaponIds[ID];
-
-                    weaponIds.RemoveAt(ID);
-                }
-                else
-                {
-                    weaponPedestals[i].weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
-                }
-            }
+            Initialize();
         }
 
         if(lastWeaponPedestal != null)
@@ -111,6 +114,9 @@ public class WeaponPedestalController : MonoBehaviour
     {
         initializeWeaponPedestals = false;
         minibossSpawned = false;
+        lastWeaponPedestal = null;
+        weaponPedestals.Clear();
+        weaponIds.Clear();
     }
 
     int RollWithWeights(Monster[] array)

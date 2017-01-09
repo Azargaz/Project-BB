@@ -13,8 +13,6 @@ public class Projectile : DamageLivingCreature
     float velocityXSmoothing;
     Vector2 velocity;
     Controller2D controller;
-    [HideInInspector]
-    public GameObject source;
     public bool freeze;
 
     protected override void Awake()
@@ -50,10 +48,7 @@ public class Projectile : DamageLivingCreature
 
     protected override void AfterHit()
     {
-        if (source != null)
-        {
-            source.GetComponent<PlayerCreature>().RestoreHealthAfterAttack();
-        }
+        base.AfterHit();
 
         Destroy(gameObject);
     }

@@ -46,8 +46,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GameOver()
+    public IEnumerator GameOver()
     {
+        GameObject.FindGameObjectWithTag("YouDied").GetComponent<Animator>().SetTrigger("Play");
+        yield return new WaitForSeconds(3f);
         Debug.Log("Gameover. Your score: " + Score);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }

@@ -54,7 +54,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (freeze)
+        if (freeze || !creature.stats.alive)
             return;
 
         if(transform.position.y < -100)
@@ -80,7 +80,7 @@ public class Player : MonoBehaviour
         {
             WeaponManager.wp.RollCritical();
             anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
-            anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (hitCount > 0 ? hitCount : 0)) / 10f);            
+            anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (weaponM.equippedWeapon.comboHits > 0 ? hitCount : 0)) / 10f);            
             anim.SetTrigger("Attack");            
         }
 
@@ -193,7 +193,7 @@ public class Player : MonoBehaviour
     {
         int numberOfHits = weaponM.equippedWeapon.comboHits;
 
-        if (weaponM.equippedWeapon.aoeObject.Length < hitCount - 1)
+        if (numberOfHits <= 0)
             hitCount = 0;
 
         if (weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0] != null)
