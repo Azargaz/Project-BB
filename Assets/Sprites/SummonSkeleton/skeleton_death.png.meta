@@ -1,12 +1,15 @@
 fileFormatVersion: 2
-guid: 93cc4ed6e5b9e824eac558aa5e37d104
-timeCreated: 1484262635
+guid: 86618cdea58af1c44bc4c756cb6c864b
+timeCreated: 1484260956
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: skeleton_jump_0
-    21300002: skeleton_jump_1
-    21300004: skeleton_jump_2
+    21300000: skeleton_death_0
+    21300002: skeleton_death_1
+    21300004: skeleton_death_2
+    21300006: skeleton_death_3
+    21300008: skeleton_death_4
+    21300010: skeleton_death_5
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -89,7 +92,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: skeleton_jump_0
+      name: skeleton_death_0
       rect:
         serializedVersion: 2
         x: 0
@@ -102,7 +105,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: skeleton_jump_1
+      name: skeleton_death_1
       rect:
         serializedVersion: 2
         x: 32
@@ -115,10 +118,49 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: skeleton_jump_2
+      name: skeleton_death_2
       rect:
         serializedVersion: 2
         x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: skeleton_death_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: skeleton_death_4
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: skeleton_death_5
+      rect:
+        serializedVersion: 2
+        x: 160
         y: 0
         width: 32
         height: 32

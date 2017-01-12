@@ -18,7 +18,7 @@ public class SpikesController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if(other.gameObject.layer == 8)
+        if(other.GetComponent<PlayerCreature>() != null)
         {
             playerStepOnCount++;
             ChangeSprite();
@@ -27,17 +27,17 @@ public class SpikesController : MonoBehaviour
 
     void ChangeSprite()
     {
-        if (playerStepOnCount > firstSpriteStepCount)
+        if (playerStepOnCount >= firstSpriteStepCount)
         {
             sprite.sprite = sprites[0];
         }
 
-        if (playerStepOnCount > secondSpriteStepCount)
+        if (playerStepOnCount >= secondSpriteStepCount)
         {
             sprite.sprite = sprites[1];
         }
 
-        if (playerStepOnCount > thirdSpriteStepCount)
+        if (playerStepOnCount >= thirdSpriteStepCount)
         {
             sprite.sprite = sprites[2];
         }

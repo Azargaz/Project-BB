@@ -6,6 +6,7 @@ public class DamageLivingCreature : MonoBehaviour
 {        
     [Header("Damage living creatures")]
     public bool damagePlayer;
+    public bool damageAll;
     public bool ignoreFlying;
 
     public int damage;
@@ -45,10 +46,10 @@ public class DamageLivingCreature : MonoBehaviour
         if (target == creature)
             return;
 
-        if (target is PlayerCreature && !damagePlayer)
+        if ((target is PlayerCreature || target is SummonCreature) && !damagePlayer && !damageAll)
             return;
 
-        if (target is EnemyCreature && damagePlayer)
+        if (target is EnemyCreature && damagePlayer && !damageAll)
             return;
 
         bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);

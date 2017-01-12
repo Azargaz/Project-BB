@@ -20,11 +20,6 @@ public class HoveringGhostEnemyAI : EnemyAI
         base.Start();
 
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
-
-        if (creature.enemySize > 1)
-        {
-            attackRange += (attackRange * (creature.enemySize - 1)) / 2;
-        }
     }
 
     protected override void Update()
@@ -34,7 +29,7 @@ public class HoveringGhostEnemyAI : EnemyAI
         if (freeze)
             return;
 
-        Vector2 input = playerDirection;
+        Vector2 input = targetDirection;
 
         switch (currentState)
         {
@@ -51,7 +46,7 @@ public class HoveringGhostEnemyAI : EnemyAI
                 }
             case EnemyState.walk:
                 {                    
-                    input = playerDirection;
+                    input = targetDirection;
                     break;
                 }
             case EnemyState.attack:
@@ -98,7 +93,7 @@ public class HoveringGhostEnemyAI : EnemyAI
     {
         if (input != 0)
         {
-            facing = (int)playerDirection.x;
+            facing = (int)targetDirection.x;
             Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
 
             if (transform.FindChild("Hitbox") != null)

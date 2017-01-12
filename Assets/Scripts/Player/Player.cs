@@ -54,6 +54,13 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (!creature.stats.alive)
+        {
+            velocity.x = 0;
+            velocity.y += gravity * Time.deltaTime;
+            controller.Move(velocity * Time.deltaTime);
+        }
+
         if (freeze || !creature.stats.alive)
             return;
 

@@ -4,19 +4,21 @@ using UnityEngine;
 using Pathfinding;
 
 [RequireComponent(typeof(Controller2D))]
-[RequireComponent(typeof(EnemyCreature))]
+[RequireComponent(typeof(LivingCreature))]
 public class EnemyAI : MonoBehaviour
 {    
     protected enum EnemyState { idle, stop, walk, attack };
     protected EnemyState currentState = EnemyState.idle;
 
-    [Header("Enemy AI")]
+    [Header("Base AI")]
     public float range = 10f;    
     public float followRange = 1f;
     public float minDistanceFromTarget = 0.5f;
 
     public bool canJump = true;
     public bool canDropDown = true;
+    [SerializeField]
+    protected bool canAttack = true;
     protected bool jump = false;
 
     public float attackRange = 1f;
@@ -28,17 +30,20 @@ public class EnemyAI : MonoBehaviour
 
     [HideInInspector]
     public Vector3 velocity;
-    public Vector3 storedVelocity;
-    
-    protected Vector2 playerDirection = Vector2.zero; 
+    Vector3 storedVelocity;
+
+    protected Vector2 targetDirection = Vector2.zero; 
 
     protected Animator anim;
     protected Controller2D controller;
-    protected EnemyCreature creature;
+    protected LivingCreature creature;
 
     [Header("Pathfinding")]
     public bool pathfinding = true;
     protected Transform target;
+    [HideInInspector]
+    public Transform enemyTarget;
+    protected Transform playerTarget;
     public float updateRate = 10f;
     Seeker seeker;
     public Path path;
@@ -55,14 +60,15 @@ public class EnemyAI : MonoBehaviour
 
     protected virtual void Start()
     {
-        if(target == null)
+        if(playerTarget == null)
         {
-            target = GameObject.FindGameObjectWithTag("Player").transform;
+            playerTarget = GameObject.FindGameObjectWithTag("Player").transform;
+            target = playerTarget;
         }
 
         attackTimer = attackCooldown;
         controller = GetComponent<Controller2D>();
-        creature = GetComponent<EnemyCreature>();
+        creature = GetComponent<LivingCreature>();
         anim = GetComponent<Animator>();
         
         if(pathfinding && GetComponent<Seeker>() != null)
@@ -87,6 +93,11 @@ public class EnemyAI : MonoBehaviour
         {
             anim.speed = 1;
         }
+
+        if (enemyTarget != null)
+            target = enemyTarget;
+        else
+            target = playerTarget;
 
         if (!creature.stats.alive)
             return;
@@ -128,11 +139,11 @@ public class EnemyAI : MonoBehaviour
         }
 
         // If player is in attack range, attack - if it's on cooldown, stop
-        if (attackTimer <= 0 && !attacked)
+        if (attackTimer <= 0 && !attacked && canAttack)
         {
             if (distToTarget <= Random.Range(minDistanceFromTarget, attackRange))
             {
-                playerDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, 0);
+                targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, 0);
                 attacked = true;
                 return EnemyState.attack;
             }
@@ -140,9 +151,9 @@ public class EnemyAI : MonoBehaviour
             {             
                 if (Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget)
                 {
-                    playerDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
+                    targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
 
-                    controller.jumpDown = playerDirection.y == -1;
+                    controller.jumpDown = targetDirection.y == -1;
 
                     return EnemyState.walk;
                 }
@@ -155,9 +166,9 @@ public class EnemyAI : MonoBehaviour
         {
             if(distToTarget > followRange && Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget)
             {
-                playerDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
+                targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
 
-                controller.jumpDown = playerDirection.y == -1;
+                controller.jumpDown = targetDirection.y == -1;
 
                 return EnemyState.walk;
             }            
@@ -179,7 +190,7 @@ public class EnemyAI : MonoBehaviour
         if (target == null)
         {
             if (debugAI)
-                Debug.LogError("GroundEnemyAI can't find player.");
+                Debug.LogError("EnemyAI can't find the target.");
             return EnemyState.idle;
         }
 
@@ -190,20 +201,37 @@ public class EnemyAI : MonoBehaviour
         if (distToTarget > range)
         {
             if (debugAI)
-                Debug.Log("Player out of range.");
+                Debug.Log("The target is out of range.");
 
             return EnemyState.idle;
         }
 
+        float randomizedAttackRange;
+
+        if (minDistanceFromTarget < attackRange)
+            randomizedAttackRange = Random.Range(minDistanceFromTarget, attackRange);
+        else
+            randomizedAttackRange = Random.Range(attackRange, minDistanceFromTarget);
+
         // If player is in attack range and attack isn't on cooldown, attack
-        if (attackTimer <= 0 && !attacked && controller.collisions.below)
-        {
-            if (distToTarget <= Random.Range(minDistanceFromTarget, attackRange))
+        if (attackTimer <= 0 && !attacked && controller.collisions.below && canAttack)
+        {            
+            if (distToTarget <= randomizedAttackRange)
             {
-                playerDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, 0);
+                targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, 0);
                 attacked = true;
                 return EnemyState.attack;
             }
+        }
+        else if(canAttack)
+        {
+            if ((!canJump || !canDropDown) && Mathf.Abs(targetPosDifference.x) < minDistanceFromTarget)
+                return EnemyState.stop;
+
+            if (distToTarget <= attackRange)
+                return EnemyState.stop;
+
+            return EnemyState.walk;
         }
 
         // Else walk towards player        
@@ -251,13 +279,13 @@ public class EnemyAI : MonoBehaviour
 
     protected void Pathfinding()
     {
-        float distToTarget = Vector2.Distance(target.transform.position, transform.position);
+        float distToTarget = Vector2.Distance(target.transform.position, transform.position);        
 
         if (distToTarget < minDistanceFromTarget)
             path = null;
 
         Vector2 normalizedDirection = Vector2.zero;
-        Vector2 input = Vector2.zero;        
+        Vector2 input = Vector2.zero;
         float dist = 0;
 
         if (path != null && target != null)
@@ -299,15 +327,11 @@ public class EnemyAI : MonoBehaviour
 
                 if (canJump)
                 {
-                    if (input.y == 1 && Mathf.Abs(normalizedDirection.x) < 0.2f)
-                        jump = true;
+                    if (input.y == 1 && Mathf.Abs(normalizedDirection.x) > 0.2f)
+                        input.y = 0;
 
                     if (controller.collisions.left || controller.collisions.right)
-                        jump = true;
-
-                    // Reset jump
-                    if (normalizedDirection.y <= 0)
-                        jump = false;
+                        input.y = 1;
                 }
 
                 // Droping down on platforms
@@ -326,13 +350,19 @@ public class EnemyAI : MonoBehaviour
         }
         else if(path == null)
         {
-            playerDirection.x = 0;
+            targetDirection.x = 0;
         }
 
-        playerDirection.y = input.y;
+        if (!canJump && input.y > 0)
+            input.y = 0;
+
+        if (!canDropDown && input.y < 0)
+            input.y = 0;
+
+        targetDirection.y = input.y;
 
         if (input.x != 0)
-            playerDirection.x = input.x;   
+            targetDirection.x = input.x;   
 
         if (path == null || currentWaypoint >= path.vectorPath.Count || pathIsEnded || dist == 0)
             return;

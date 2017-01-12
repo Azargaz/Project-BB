@@ -27,7 +27,7 @@ public abstract class LivingCreature : MonoBehaviour
         public bool invincible;
         public bool immovable;
 
-        public float defaultInvincibilityDuration;        
+        public float defaultInvincibilityDuration = 0.5f;        
 
         [Header("Dont change - info only")]
         public int curHealth;
@@ -93,6 +93,11 @@ public abstract class LivingCreature : MonoBehaviour
     public Statistics stats = new Statistics();
     public GameObject damageDisplay;
 
+    void Start()
+    {
+        stats.Initialize();
+    }
+
     protected virtual void Update()
     {
         if (!stats.alive)
@@ -153,6 +158,7 @@ public abstract class LivingCreature : MonoBehaviour
                     clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString();
 
                 clone.GetComponent<Animator>().SetTrigger("Display");
+                clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
                 Destroy(clone, 1f);
             }
             stats.curHealth -= damageTaken;

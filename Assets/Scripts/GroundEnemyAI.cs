@@ -5,18 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(Seeker))]
 public class GroundEnemyAI : EnemyAI
 {
-    [Header("GroundEnemy AI")]
-    public float jumpHeight = 4;
+    [Header("Ground AI")]
+    public float maxJumpHeight = 4;
+    public float minJumpHeight = 1;
     public float timeToJumpApex = .4f;
-    float accelerationTimeAirborne = .2f;
-    float accelerationTimeGrounded = .1f;
+    protected float accelerationTimeAirborne = .2f;
+    protected float accelerationTimeGrounded = .1f;
     public float movementSpeed;
-    float moveSpeed = 6;
+    protected float moveSpeed = 6;
 
-    float gravity;
-    float jumpVelocity;
-    float velocityXSmoothing;
-    int facing = 1;
+    protected float gravity;
+    protected float maxJumpVelocity;
+    protected float minJumpVelocity;
+    protected float velocityXSmoothing;
+    protected int facing = 1;
 
     [Header("")]
     public bool debug;
@@ -28,18 +30,15 @@ public class GroundEnemyAI : EnemyAI
         base.Start();
         
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
-        
-        if(creature.enemySize > 1)
-        {
-            attackRange += (attackRange * (creature.enemySize - 1)) / 2;
-        }
 
-        #region Jumping
+        RecalculateJumpVelocity();
+    }
 
-        gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
-
-        #endregion
+    protected void RecalculateJumpVelocity()
+    {
+        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
+        maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
+        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
     }
 
     protected override void Update ()
@@ -53,9 +52,8 @@ public class GroundEnemyAI : EnemyAI
         {
             velocity.y = 0;
         }
-
-        Vector2 input = playerDirection;
-        Pathfinding();
+                
+        Vector2 input = targetDirection;        
 
         #region EnemyStates
 
@@ -72,45 +70,60 @@ public class GroundEnemyAI : EnemyAI
 
                     if (jump)
                         jump = false;
-
                     break;
                 }
             case EnemyState.walk:
-                {                    
+                {
+                    Pathfinding();
+                    input = targetDirection;
                     break;
                 }
             case EnemyState.attack:
                 {
-                    input.x = 0;
                     creature.stats.animationBusy = true;
-                    anim.SetTrigger("Attack");
-                    Animations(input.x);                    
+                    input.y = 0;
+                    Animations(input.x);
+                    anim.SetTrigger("Attack");                 
                     break;
                 }
         }
 
-        #endregion
+        #endregion     
 
         // Block movement if stunned or busy
-        if (creature.stats.stunned || creature.stats.animationBusy)
-            input = Vector2.zero;
-
-        if ((controller.collisions.right && input.x == 1) || (controller.collisions.left && input.x == -1))
+        if (creature.stats.animationBusy)
+        {
             input.x = 0;
-
-        Animations(input.x);        
-
-        #region Jumping
-
-        if (jump && controller.collisions.below)
-        {
-            velocity.y = jumpVelocity;           
-            jump = false;
         }
-        else if (!controller.collisions.below)
+
+        if(creature.stats.stunned)
         {
-            jump = false;
-        }   
+            input = Vector2.zero;
+        }
+
+        if ((controller.collisions.right && input.x == 1) || (controller.collisions.left && input.x == -1))            
+        {
+            input.x = 0;
+        }
+
+        Animations(input.x);
+
+        #region Jumping        
+
+        if (input.y < 0)
+        {
+            if (velocity.y > minJumpVelocity)
+            {
+                velocity.y = minJumpVelocity;
+            }
+        }
+        if (input.y > 0 && controller.collisions.below)
+        {
+            if (controller.collisions.below)
+            {
+                velocity.y = maxJumpVelocity;
+            }
+        }
 
         #endregion
 
@@ -128,26 +141,17 @@ public class GroundEnemyAI : EnemyAI
     {
         if (input != 0)
         {
-            facing = (int)input;
+            facing = input > 0 ? 1 : -1;
             Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
 
             if (transform.FindChild("Hitbox") != null)
             {
-                if (facing > 0)
-                {
-                    hitboxPos.x = Mathf.Abs(hitboxPos.x);
-                }
-                else if (facing < 0)
-                {
-                    hitboxPos.x = -Mathf.Abs(hitboxPos.x);
-                }
-
+                hitboxPos.x = facing * Mathf.Abs(hitboxPos.x);
                 transform.FindChild("Hitbox").localPosition = hitboxPos;
             }
 
+            GetComponent<SpriteRenderer>().flipX = facing < 0;            
         }
-
-        GetComponent<SpriteRenderer>().flipX = facing < 0;
 
         anim.SetFloat("Input", Mathf.Abs(input));
         //anim.SetBool("Grounded", controller.collisions.below);
