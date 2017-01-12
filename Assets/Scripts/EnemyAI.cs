@@ -91,11 +91,6 @@ public class EnemyAI : MonoBehaviour
         if (!creature.stats.alive)
             return;
 
-        if (!canJump)
-            anim.SetBool("Grounded", true);
-        else
-            anim.SetBool("Grounded", controller.collisions.below);
-
         currentState = pathfinding ? SearchTargetWithPathfinding() : SearchTarget();
 
         // Attack & SearchPlayer cooldown
