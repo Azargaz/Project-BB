@@ -83,7 +83,7 @@ public class Room : MonoBehaviour
         {
             for (int i = 0; i < emptySpaces.Count; i++)
             {
-                if(emptySpaces.Contains(new Vector2(emptySpaces[i].x, emptySpaces[i].y - 1)))
+                if(emptySpaces.Contains(new Vector2(emptySpaces[i].x, emptySpaces[i].y - 1)) || ignoreFields.Contains(new Vector2(emptySpaces[i].x, emptySpaces[i].y - 1)))
                     continue;
 
                 bool spawnExit = Random.value > 0.5f;

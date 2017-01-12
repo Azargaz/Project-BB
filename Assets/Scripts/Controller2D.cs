@@ -85,14 +85,9 @@ public class Controller2D : MonoBehaviour
 
             if (hit)
             {
-                //Platforms
-                if (player)
-                    if (hit.collider.gameObject.layer == 11 && Input.GetAxisRaw("Vertical") < 0 && Mathf.Abs(velocity.y) < 0.1f)
-                        continue;
-
-                if (!player)
-                    if (hit.collider.gameObject.layer == 11 && jumpDown)
-                        continue;
+                //Platforms                
+                if (hit.collider.gameObject.layer == 11 && jumpDown && Mathf.Abs(velocity.y) < 0.1f)
+                    continue;                                                        
 
                 if ((hit.collider.gameObject.layer == 11 && directionY == 1))
                     continue;

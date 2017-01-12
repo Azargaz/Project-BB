@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Seeker))]
 public class GroundEnemyAI : EnemyAI
 {
     [Header("GroundEnemy AI")]
@@ -11,9 +12,6 @@ public class GroundEnemyAI : EnemyAI
     float accelerationTimeGrounded = .1f;
     public float movementSpeed;
     float moveSpeed = 6;
-
-    public bool canJump;
-    bool jump = false;
 
     float gravity;
     float jumpVelocity;
@@ -25,8 +23,9 @@ public class GroundEnemyAI : EnemyAI
 
     protected override void Start ()
     {
-        base.Start();
+        pathfinding = true;
 
+        base.Start();
         
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
         
@@ -55,60 +54,63 @@ public class GroundEnemyAI : EnemyAI
             velocity.y = 0;
         }
 
-        Vector2 input;
-        input.x = playerDirection.x;
+        Vector2 input = playerDirection;
+        Pathfinding();
 
-        switch(currentState)
+        #region EnemyStates
+
+        switch (currentState)
         {
             case EnemyState.idle:
                 {
-                    input.x = Idle() * facing;
+                    input = Vector2.zero;
                     break;
                 }
             case EnemyState.stop:
                 {
                     input.x = 0;
+
+                    if (jump)
+                        jump = false;
+
                     break;
                 }
             case EnemyState.walk:
-                {
+                {                    
                     break;
                 }
             case EnemyState.attack:
-                {                    
+                {
+                    input.x = 0;
                     creature.stats.animationBusy = true;
                     anim.SetTrigger("Attack");
-                    Animations(input.x);
-                    input.x = 0;
+                    Animations(input.x);                    
                     break;
                 }
         }
 
+        #endregion
+
         // Block movement if stunned or busy
         if (creature.stats.stunned || creature.stats.animationBusy)
+            input = Vector2.zero;
+
+        if ((controller.collisions.right && input.x == 1) || (controller.collisions.left && input.x == -1))
             input.x = 0;
 
-        if((input.x > 0 && controller.collisions.right) || (input.x < 0 && controller.collisions.left))
-        {
-            if (canJump)
-                jump = true;
-            else
-                input.x = 0;
-        }
-
-        Animations(input.x);
+        Animations(input.x);        
 
         #region Jumping
 
         if (jump && controller.collisions.below)
         {
-            velocity.y = jumpVelocity;
+            velocity.y = jumpVelocity;           
             jump = false;
         }
-        else if(!controller.collisions.below)
+        else if (!controller.collisions.below)
         {
             jump = false;
-        }
+        }   
 
         #endregion
 
@@ -120,11 +122,6 @@ public class GroundEnemyAI : EnemyAI
         controller.Move(velocity * Time.deltaTime);
 
         #endregion
-    }
-
-    int Idle()
-    {
-        return 0;
     }
 
     void Animations(float input)

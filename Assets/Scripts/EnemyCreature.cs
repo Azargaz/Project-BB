@@ -67,7 +67,7 @@ public class EnemyCreature : LivingCreature
         }
 
         // Knockback
-        if (knockbackPower != 0 && dmgSource != null && controller != null && !stats.immovable)
+        if (knockbackPower != 0 && dmgSource != null && controller != null && !stats.immovable && !controller.freeze)
         {
             float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
             float velocityX = (direction > 0 ? -1 : 1) * knockbackPower;

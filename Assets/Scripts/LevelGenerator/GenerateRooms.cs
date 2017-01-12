@@ -56,7 +56,12 @@ public class GenerateRooms : MonoBehaviour
         GenerateRoom(new int[] { 1, 2 }, 0, 0);
         SpawnRooms();
         CreateBorder(-15);
-        SpawnObstaclesAndMonsters();
+        SpawnObstaclesAndMonsters();        
+    }
+
+    void Start()
+    {
+        AstarPath.active.Scan();
     }
 
     int RollWithWeights(Obstacle[] array)

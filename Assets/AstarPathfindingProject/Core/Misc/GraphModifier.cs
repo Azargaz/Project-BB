@@ -186,7 +186,9 @@ namespace Pathfinding {
 
 		void Reset () {
 			// Create a new random 64 bit value (62 bit actually because we skip negative numbers, but that's still enough by a huge margin)
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 			uniqueID = (ulong)Random.Range(0, int.MaxValue) | ((ulong)Random.Range(0, int.MaxValue) << 32);
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
 			usedIDs[uniqueID] = this;
 		}
 	}

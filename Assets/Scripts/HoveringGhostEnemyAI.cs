@@ -34,8 +34,7 @@ public class HoveringGhostEnemyAI : EnemyAI
         if (freeze)
             return;
 
-        Vector2 input = Vector2.zero;
-        input = playerDirection;
+        Vector2 input = playerDirection;
 
         switch (currentState)
         {
@@ -47,7 +46,7 @@ public class HoveringGhostEnemyAI : EnemyAI
             case EnemyState.stop:
                 {
                     circleTimer += Time.deltaTime;
-                    input = Circle(playerPos);
+                    input = Circle(target.position);
                     break;
                 }
             case EnemyState.walk:
@@ -72,7 +71,7 @@ public class HoveringGhostEnemyAI : EnemyAI
 
         #region Movement stuff (gravity, moving)
 
-        Vector2 targetVelocity = input.normalized * moveSpeed;
+        Vector2 targetVelocity = input * moveSpeed;
         velocity = Vector2.SmoothDamp(velocity, targetVelocity, ref velocitySmoothing, accelerationTime, Mathf.Infinity, Time.deltaTime);
         controller.Move(velocity * Time.deltaTime);
 

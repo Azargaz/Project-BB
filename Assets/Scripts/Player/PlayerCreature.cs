@@ -10,16 +10,19 @@ public class PlayerCreature : LivingCreature
     [HideInInspector]
     public WeaponManager weaponM;
     bool cheatMode = false;
+
+    #region Time stop
     bool timeStopped = false;
     public float timeStoppedDuration;
-    GameObject timeStoppedCounter;
+    GameObject timeStopHUD;
     float timeStoppedTimeLeft;
     int stoppedMobsCount = 0;
     int stoppedProjectilesCount = 0;
+    #endregion
 
     void Awake()
     {
-        timeStoppedCounter = GameObject.FindGameObjectWithTag("TimeStop");
+        timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
         DontDestroyOnLoad(this);
         anim = GetComponent<Animator>();
         stats.Initialize();
@@ -36,14 +39,12 @@ public class PlayerCreature : LivingCreature
 
         #region Time stop
 
-        if(timeStoppedCounter == null)
-            timeStoppedCounter = GameObject.FindGameObjectWithTag("TimeStop");
+        if(timeStopHUD == null)
+            timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
         else
         {
-            timeStoppedCounter.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
-            Vector2 curSizeDelta = timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta;
-            float smooth = 0.1f;
-            timeStoppedCounter.GetComponentInChildren<Image>().rectTransform.sizeDelta = timeStopped ? Vector2.Lerp(curSizeDelta, new Vector2(Screen.width * 2, Screen.width * 2), smooth) : Vector2.Lerp(curSizeDelta, Vector2.zero, smooth);
+            timeStopHUD.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
+            timeStopHUD.GetComponent<Animator>().SetBool("TimeStopped", timeStopped);
         }
 
         if (timeStopped)
@@ -207,13 +208,19 @@ public class PlayerCreature : LivingCreature
         if (stats.invincible)
             return false;
 
+        #region Restore Health
+
         healthToRestore += damageTaken;
         timeToRH = timeForRH;
         
         if (timeToRH <= 0)
             timeToRH = timeForRH;
 
-        if(!stats.stunned)
+        #endregion
+
+        #region Stun
+
+        if (!stats.stunned)
         {
             if (anim != null)
                 anim.SetTrigger("Stunned");
@@ -221,13 +228,18 @@ public class PlayerCreature : LivingCreature
             stats.stunned = true;
         }
 
-        // Knockback
+        #endregion
+
+        #region Knockback
+
         if (knockbackPower != 0 && dmgSource != null)
         {
             float direction = Mathf.Sign(dmgSource.transform.position.x - transform.position.x);
             float velocityX = (direction > 0 ? -1 : 1) * knockbackPower;
             controller.velocity.x += velocityX;
         }
+
+        #endregion
 
         return true;
     }

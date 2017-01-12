@@ -11,9 +11,17 @@ public class WeaponPedestalController : MonoBehaviour
 
     [HideInInspector]
     public List<WeaponPedestal> weaponPedestals;
-    List<int> weaponIds = new List<int>();
+    List<int> usedWeaponIDs = new List<int>();
+    public WeaponDrops[] weaponDropChances;
     public bool initializeWeaponPedestals;
     public static WeaponPedestalController WPC;
+
+    [System.Serializable]
+    public class WeaponDrops
+    {
+        public string name;
+        public int chanceToSpawnWeight;
+    }
 
     [System.Serializable]
     public class Monster
@@ -49,31 +57,22 @@ public class WeaponPedestalController : MonoBehaviour
     }
 
     void Initialize()
-    {  
-        for (int i = 0; i < WeaponManager.wp.weapons.Length; i++)
-        {
-            if (WeaponManager.wp.equippedWeapon.id == i)
-                continue;
-
-            weaponIds.Add(i);
-        }
+    {
+        usedWeaponIDs.Clear();
+        usedWeaponIDs.Add(WeaponManager.wp.currentWeapon);
 
         for (int i = 0; i < weaponPedestals.Count; i++)
         {
             int ID;
-
-            if (weaponIds.Count > 0)
+            
+            do
             {
-                ID = Random.Range(0, weaponIds.Count);
-
-                weaponPedestals[i].weaponId = weaponIds[ID];
-
-                weaponIds.RemoveAt(ID);
+                ID = RollWithWeights(weaponDropChances);
             }
-            else
-            {
-                weaponPedestals[i].weaponId = Random.Range(1, WeaponManager.wp.weapons.Length);
-            }
+            while (usedWeaponIDs.Contains(ID));
+
+            weaponPedestals[i].weaponId = ID;
+            usedWeaponIDs.Add(ID);
         }
     }
 
@@ -116,7 +115,35 @@ public class WeaponPedestalController : MonoBehaviour
         minibossSpawned = false;
         lastWeaponPedestal = null;
         weaponPedestals.Clear();
-        weaponIds.Clear();
+        usedWeaponIDs.Clear();
+    }
+
+    int RollWithWeights(WeaponDrops[] array)
+    {
+        int summedWeights = 0;
+        int returnInt = 0;
+
+        if (array.Length <= 1)
+            return 0;
+
+        for (int x = 0; x < array.Length; x++)
+        {
+            summedWeights += array[x].chanceToSpawnWeight;
+        }
+
+        for (int x = 0; x < array.Length; x++)
+        {
+            int random = Random.Range(0, summedWeights);
+            random -= array[x].chanceToSpawnWeight;
+
+            if (random <= 0)
+            {
+                returnInt = x;
+                break;
+            }
+        }
+
+        return returnInt;
     }
 
     int RollWithWeights(Monster[] array)

@@ -45,10 +45,11 @@ public class DamageLivingCreature : MonoBehaviour
         if (target == creature)
             return;
 
-        if (target is EnemyCreature && damagePlayer)
-        {
+        if (target is PlayerCreature && !damagePlayer)
             return;
-        }
+
+        if (target is EnemyCreature && damagePlayer)
+            return;
 
         bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
 

@@ -11,9 +11,9 @@ public class SpawnGameManager : MonoBehaviour
     {
         gm = GameObject.FindGameObjectWithTag("GameController");
 
-        if(gm == null)
-        {
-            Instantiate(gameManager);
+        if (gm == null)
+        {            
+            gm = Instantiate(gameManager);
         }
     }
 }

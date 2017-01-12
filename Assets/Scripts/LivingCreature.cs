@@ -166,7 +166,7 @@ public abstract class LivingCreature : MonoBehaviour
         stats.alive = false;
     }
 
-    #region Animation events
+    #region Animations events
 
     protected void AnimationStunnedEnd()
     {
@@ -202,5 +202,6 @@ public abstract class LivingCreature : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
     #endregion
 }

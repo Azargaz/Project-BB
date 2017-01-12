@@ -9,26 +9,30 @@ public class WeaponManager : MonoBehaviour
     public class Weapon
     {
         [HideInInspector]
-        public int id;
+        public int id; // Don't change! ID used for weapon pedestals
         public string name;
-        public int baseDamage;        
-        public int criticalDamage;
+        public int baseDamage;
+        [HideInInspector]        
+        public int criticalDamage; // Don't change! Assigned automaticaly in Init() function
         public int knockbackPower;
         public int useStaminaCost;
         [Range(0.0f, 100.0f)]
         public float criticalChance;
         public float criticalMultiplier = 1.5f;
-        public bool crit;
-        public Sprite sprite;
-        public GameObject[] aoeObject;
-        public enum AnimationType { horizontal, vertical, command, horizontal_vertical, dash };
-        public AnimationType attackType;
-        public int comboHits;
-        public float attackSpeed = 1;
+        public bool crit; // Used for crits, if true next attack will be critical
+        public Sprite sprite; // Sprite of weapon
+        public GameObject[] aoeObject; // 'Swing' object for this weapon, if has combohits it should have more than 1
+        public enum AnimationType { horizontal, vertical, command, horizontal_vertical, dash }; // Read below
+        public AnimationType attackType; // Animation used with this weapon
+        public int comboHits = 0; // Number of additional hits
+        public float attackSpeed = 1; // Speed of player's and swings' animations
+        [Header("Weapon Specials")]
+        public bool weaponSpecialActive = false;
+        public float weaponSpecialDelay = 0f; // Delay (or lack of it) for weapon special abilities e.g: dagger dash behind enemy
 
         public void Init()
         {
-            criticalDamage = (int)(baseDamage * criticalMultiplier);
+            criticalDamage = Mathf.RoundToInt(baseDamage * criticalMultiplier);
             crit = false;
         }
     }
@@ -36,8 +40,11 @@ public class WeaponManager : MonoBehaviour
     public static WeaponManager wp;
     [HideInInspector]
     public Weapon equippedWeapon;
+    [Header("Weapons")]
     public int currentWeapon = 0;
-    public Weapon[] weapons;     
+    public Weapon[] weapons;
+    [Header("Weapon specific variables")]
+    public int daggersDashDistance = 15;
 
     public void RollCritical()
     {

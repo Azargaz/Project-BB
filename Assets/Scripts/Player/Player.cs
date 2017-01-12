@@ -65,6 +65,7 @@ public class Player : MonoBehaviour
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
+            controller.jumpDown = false;
         }
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -107,7 +108,10 @@ public class Player : MonoBehaviour
 
         #endregion
 
-        #region Jumping
+        #region Jumping/Jumping down platforms
+
+        if (input.y < 0)
+            controller.jumpDown = true;
 
         if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
         {
@@ -166,7 +170,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    #region AnimationEvents + stamina costs
+    #region AnimationEvents
 
     void AnimationDash()
     {
@@ -226,7 +230,36 @@ public class Player : MonoBehaviour
                 swingColor = new Color(1, 1, 1);
                 swing.GetComponentInChildren<SpriteRenderer>().color = swingColor;
             }
-        }   
+        }
+
+        if(weaponM.equippedWeapon.weaponSpecialActive)
+        {
+            float delaySpecialAttack = weaponM.equippedWeapon.weaponSpecialDelay;
+            StartCoroutine(AnimationWeaponAttackSpecial(delaySpecialAttack));
+        }
+    }
+
+    IEnumerator AnimationWeaponAttackSpecial(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        switch (weaponM.currentWeapon)
+        {
+            //TEMPLATE
+            //Greatsword
+            case 0:
+                {
+
+                    break;
+                }
+            //Daggers
+            case 2:
+                {
+                    AnimationAttackStep(weaponM.daggersDashDistance);
+                    facing = -facing;
+                    break;
+                }
+        }
     }
 
     void AnimationDashStep()
@@ -242,9 +275,7 @@ public class Player : MonoBehaviour
     }    
 
     void AnimationAttackStep(int distance)
-    {
-        float input = Input.GetAxisRaw("Horizontal");
-               
+    { 
         velocity.x = distance * facing;
 
         controller.Move(velocity * Time.deltaTime);

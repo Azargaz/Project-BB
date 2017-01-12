@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static int Score = 0;
+    public static int startingWeapon = 0;
     public static GameManager instance;
     public GameObject playerPrefab;
     public static GameObject player;
@@ -14,7 +15,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> flyingProjectiles;
 
     void Awake()
-    {
+    {       
         if (instance != null)
             Destroy(gameObject);
 
@@ -34,7 +35,7 @@ public class GameManager : MonoBehaviour
         {
             if(Input.GetKeyDown(KeyCode.Return))
             {
-                SceneManager.LoadScene(1);
+                SceneManager.LoadScene(3);
                 if(player != null)
                     Destroy(player);
                 Destroy(gameObject);
@@ -60,9 +61,11 @@ public class GameManager : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void StartGame()
+    public void LoadScene(int i)
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(i);
+        if (i != 1)
+            Destroy(gameObject);
     }
 
     void OnLevelWasLoaded()
@@ -72,6 +75,7 @@ public class GameManager : MonoBehaviour
             if (player == null)
             {
                 player = Instantiate(playerPrefab);
+                WeaponManager.wp.currentWeapon = startingWeapon;
                 player.transform.position = new Vector3(0, 6, 0);
             }
 
@@ -91,5 +95,10 @@ public class GameManager : MonoBehaviour
 Your score: 0";
             }
         }
+    }
+
+    public void ChangeStartingWeapon(Dropdown i)
+    {
+        startingWeapon = i.value;
     }
 }

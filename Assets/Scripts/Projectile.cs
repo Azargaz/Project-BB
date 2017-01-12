@@ -12,7 +12,9 @@ public class Projectile : DamageLivingCreature
 
     float velocityXSmoothing;
     Vector2 velocity;
+    Vector2 storedVelocity;
     Controller2D controller;
+    float freezeSmoothTime = 0.05f;
     public bool freeze;
 
     protected override void Awake()
@@ -33,7 +35,13 @@ public class Projectile : DamageLivingCreature
             Destroy(gameObject);
 
         if (freeze)
+        {
+            storedVelocity = velocity;
+            velocity = Vector3.Lerp(storedVelocity, Vector3.zero, freezeSmoothTime);
+            freezeSmoothTime += Time.deltaTime / 10000f;
+            controller.Move(velocity * Time.deltaTime);
             return;
+        }
 
         lifeTime -= Time.deltaTime;
 
