@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SpawnSummon : MonoBehaviour
 {
-    int maxSummons = 20;
+    public int maxSummons = 10;
     public Transform spawnPoint;
     public GameObject summon;
     List<GameObject> summons = new List<GameObject>();
@@ -26,6 +26,20 @@ public class SpawnSummon : MonoBehaviour
 	void AnimationSummon()
     {
         GameObject clone = Instantiate(summon, spawnPoint.position, Quaternion.identity);
+
+        if (WeaponManager.wp.equippedWeapon.secondaryCrit)
+        {
+            Color swingColor = clone.GetComponent<SpriteRenderer>().color;
+            swingColor = new Color(1f, 0.5f, 0.5f);
+            clone.GetComponent<SpriteRenderer>().color = swingColor;
+
+            float multiplier = WeaponManager.wp.equippedWeapon.secondaryCriticalMultiplier;
+            LivingCreature.Statistics stats = clone.GetComponent<SummonCreature>().stats;
+            stats.maxHealth = (int)(multiplier * stats.maxHealth);
+            stats.Initialize();
+            stats.damage = (int)(multiplier * stats.damage);            
+        }
+
         clone.transform.parent = GameObject.Find("PlayerSummons").transform;
         summons.Add(clone);
     }

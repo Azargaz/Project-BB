@@ -31,6 +31,7 @@ public class Player : MonoBehaviour
     PlayerCreature creature;
     LivingCreature.Statistics stats;
     WeaponManager weaponM;
+    bool secondaryAttack = false;
     Transform trail;
     Animator anim;
     public int facing = 1;
@@ -48,8 +49,6 @@ public class Player : MonoBehaviour
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-
-        //print("Gravity: " + gravity + "  Jump Velocity: " + maxJumpVelocity);
     }
 
     void Update()
@@ -63,11 +62,6 @@ public class Player : MonoBehaviour
 
         if (freeze || !creature.stats.alive)
             return;
-
-        if(transform.position.y < -100)
-        {
-            transform.position = Vector2.one;
-        }
 
         if (controller.collisions.above || controller.collisions.below)
         {
@@ -83,14 +77,29 @@ public class Player : MonoBehaviour
             anim.SetTrigger("Dashing");
         }
 
-        // Attacking  
-        if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.weapons[weaponM.currentWeapon].useStaminaCost)
+        #region Attacking 
+
+        if(!anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
-            WeaponManager.wp.RollCritical();
-            anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
-            anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (weaponM.equippedWeapon.comboHits > 0 ? hitCount : 0)) / 10f);            
-            anim.SetTrigger("Attack");            
+            if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.equippedWeapon.useStaminaCost)
+            {
+                WeaponManager.wp.RollCritical(true);
+                anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
+                anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (weaponM.equippedWeapon.comboHits > 0 ? hitCount : 0)) / 10f);
+                secondaryAttack = false;
+                anim.SetTrigger("Attack");
+            }
+            else if (Input.GetButtonDown("Fire2") && weaponM.equippedWeapon.secondaryAttack && stats.curStamina >= weaponM.equippedWeapon.secondaryUseStaminaCost)
+            {
+                WeaponManager.wp.RollCritical(false);
+                anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.secondaryAttackSpeed);
+                anim.SetFloat("AttackId", (float)(weaponM.equippedWeapon.secondaryType + (weaponM.equippedWeapon.secondaryComboHits > 0 ? secondaryHitCount : 0)) / 10f);
+                secondaryAttack = true;
+                anim.SetTrigger("Attack");
+            }
         }
+
+        #endregion
 
         #region Animation, stunned, animationBusy, flipping sprites
 
@@ -188,7 +197,11 @@ public class Player : MonoBehaviour
 
     void AnimationDrainStamina()
     {
-        stats.curStamina -= weaponM.weapons[weaponM.currentWeapon].useStaminaCost;
+        if(secondaryAttack)
+            stats.curStamina -= weaponM.equippedWeapon.secondaryUseStaminaCost;
+        else
+            stats.curStamina -= weaponM.equippedWeapon.useStaminaCost;
+
         stats.DelayStaminaRegen();
     }
 
@@ -199,33 +212,62 @@ public class Player : MonoBehaviour
     }
 
     int hitCount = 0;
+    int secondaryHitCount = 0;
 
     void AnimationAttackSlash()
     {
-        int numberOfHits = weaponM.equippedWeapon.comboHits;
+        AnimationDrainStamina();
+
+        if (!secondaryAttack)
+        {           
+            WeaponManager.Weapon eqW = weaponM.equippedWeapon;
+            if (eqW.comboHits <= 0)
+                hitCount = 0;
+
+            GameObject aoe = weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0];
+            AttackSlash(eqW.comboHits, ref hitCount, eqW.attackSpeed, eqW.crit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+            return;
+        }
+        else
+        {
+            WeaponManager.Weapon eqW = weaponM.equippedWeapon;
+            if (!eqW.secondaryAttack)
+                return;
+            if (eqW.comboHits <= 0)
+                secondaryHitCount = 0;
+
+            GameObject aoe = weaponM.equippedWeapon.secondaryAoeObject[secondaryHitCount > 0 ? secondaryHitCount : 0];
+            AttackSlash(eqW.secondaryComboHits, ref secondaryHitCount, eqW.secondaryAttackSpeed, eqW.secondaryCrit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+            return;
+        }        
+    }
+
+    void AttackSlash(int comboHits, ref int _hitCount, float atkSpeed, bool crit, GameObject aoeObject, bool special, float specialDelay)
+    {
+        int numberOfHits = comboHits;
 
         if (numberOfHits <= 0)
-            hitCount = 0;
+            _hitCount = 0;
 
-        if (weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0] != null)
+        if (aoeObject != null)
         {
-            GameObject swing = weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0];
+            GameObject swing = aoeObject;
             Animator swingAnim = swing.transform.GetChild(0).GetComponent<Animator>();
             swingAnim.SetTrigger("Swing");
-            swingAnim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
+            swingAnim.SetFloat("AttackSpeed", atkSpeed);
             swing.transform.localScale = new Vector2(facing, 1);
 
             if (numberOfHits > 0)
             {
-                hitCount++;
+                _hitCount++;
 
-                if (hitCount > numberOfHits)
-                    hitCount = 0;                    
+                if (_hitCount > numberOfHits)
+                    _hitCount = 0;
             }
             else
-                hitCount = 0;
+                _hitCount = 0;
 
-            if(weaponM.equippedWeapon.crit)
+            if (crit)
             {
                 Color swingColor = swing.GetComponentInChildren<SpriteRenderer>().color;
                 swingColor = new Color(0.9f, 0, 0);
@@ -239,9 +281,9 @@ public class Player : MonoBehaviour
             }
         }
 
-        if(weaponM.equippedWeapon.weaponSpecialActive)
+        if (special)
         {
-            float delaySpecialAttack = weaponM.equippedWeapon.weaponSpecialDelay;
+            float delaySpecialAttack = specialDelay;
             StartCoroutine(AnimationWeaponAttackSpecial(delaySpecialAttack));
         }
     }
@@ -262,7 +304,15 @@ public class Player : MonoBehaviour
             //Daggers
             case 2:
                 {
-                    AnimationAttackStep(weaponM.daggersDashDistance);
+                    WeaponManager.Weapon eqW = weaponM.equippedWeapon;
+                    GameObject aoe = weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0];
+                    AttackSlash(eqW.comboHits, ref hitCount, eqW.attackSpeed, eqW.crit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+                    break;
+                }
+            //Katana
+            case 8:
+                {
+                    AnimationAttackStep(weaponM.katanaDashDistance);
                     facing = -facing;
                     break;
                 }

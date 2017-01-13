@@ -103,6 +103,11 @@ public abstract class LivingCreature : MonoBehaviour
         if (!stats.alive)
             return;
 
+        if (transform.position.y < -50)
+        {
+            Kill();
+        }
+
         if (stats.curHealth <= 0)
             Kill();        
 

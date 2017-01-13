@@ -45,22 +45,24 @@ public class GenerateRooms : MonoBehaviour
         public int value;
     }
 
+    ImportRoomLayouts RT;
 
     [Header("")]
     public bool debug;
 
     void Awake()
     {
+        RT = GameObject.FindGameObjectWithTag("RoomLayouts").GetComponent<ImportRoomLayouts>();
         numberOfRooms = (int) Mathf.Pow(sqrtNumberOfRooms, 2);
         rooms = new GameObject[sqrtNumberOfRooms, sqrtNumberOfRooms];
         GenerateRoom(new int[] { 1, 2 }, 0, 0);
         SpawnRooms();
-        CreateBorder(-15);
-        SpawnObstaclesAndMonsters();        
+        CreateBorder(-15);              
     }
 
     void Start()
     {
+        SpawnObstaclesAndMonsters();
         AstarPath.active.Scan();
     }
 
@@ -153,8 +155,16 @@ public class GenerateRooms : MonoBehaviour
                 //if (rooms[i, j].GetComponent<Room>().roomType == 6)
                 //    minibossesPerRoom = 1;
 
+                int infinityBreak = 0;
                 do
                 {
+                    infinityBreak++;
+                    if (infinityBreak > 20)
+                    {
+                        Debug.LogError("Couldn't spawn monsters, infinite loop in SpawnObstaclesAndMonsters()");
+                        break;
+                    }
+
                     for (int k = 0; k < emptySpaces.Count; k++)
                     {
                         float roll = Random.value;
@@ -247,7 +257,9 @@ public class GenerateRooms : MonoBehaviour
             {
                 Room thisRoom = rooms[x, y].GetComponent<Room>();
 
-                if(y < rooms.GetLength(1) - 1 && thisRoom.roomType != 6)
+                #region Changing room types
+
+                if (y < rooms.GetLength(1) - 1 && thisRoom.roomType != 6)
                 {
                     if(thisRoom.roomType == 2 || thisRoom.roomType == 4 || thisRoom.roomType == 5)
                     {
@@ -287,9 +299,12 @@ public class GenerateRooms : MonoBehaviour
                         Debug.Log("TYPE 2 TO 1 AT[" + x + ", " + y + "]");
                 }
 
+                #endregion
+
                 thisRoom = rooms[x, y].GetComponent<Room>();
                 Vector2 roomPos = new Vector2(x, y) * roomSize;
-                rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.FindChild("Rooms"));
+                rooms[x, y].GetComponent<Room>().RT = RT;
+                rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.FindChild("Rooms"));                
                 rooms[x, y].name = "R[" + x + ", " + y + "]" + " T[" + thisRoom.roomType + "]";
 
                 if (new Vector2(x, y) == exitRoom)
@@ -324,11 +339,11 @@ public class GenerateRooms : MonoBehaviour
             return;        
 
         int roomType = prefferedRoomType[Random.Range(0, prefferedRoomType.Length)];
-        GameObject roomToSpawn = roomTypes[roomType - 1];
+        GameObject roomToSpawn = roomTypes[roomType - 1];     
 
         rooms[(int)roomNumber.x, (int)roomNumber.y] = roomToSpawn;
 
-        #region Spawning
+        #region Choosing next room's direction
 
         // Choose to go up if roomType has North exit
         bool goVertical = false;
@@ -350,7 +365,7 @@ public class GenerateRooms : MonoBehaviour
 
         #endregion
 
-        #region Choosing next room type
+        #region Choosing next room's type
 
         // Choose preffered roomTypes for next room
         switch (roomType)
@@ -459,7 +474,6 @@ public class GenerateRooms : MonoBehaviour
             }
         }
     }
-
 
     void CreateBorder(int offset)
     {

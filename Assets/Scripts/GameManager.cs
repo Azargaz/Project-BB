@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().buildIndex == 2)
         {
-            if(Input.GetKeyDown(KeyCode.Return))
+            if(Input.GetButtonDown("Submit"))
             {
                 SceneManager.LoadScene(3);
                 if(player != null)

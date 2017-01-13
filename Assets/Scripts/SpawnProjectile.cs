@@ -6,7 +6,8 @@ public class SpawnProjectile : MonoBehaviour
 { 
     public GameObject projectileObject;
     public Transform firePoint;
-    public float firePointRandomOffset;
+    public float firePointRandomOffsetX;
+    public float firePointRandomOffsetY;
     Vector2 firePointInitialPos;
 
     void Awake()
@@ -19,7 +20,7 @@ public class SpawnProjectile : MonoBehaviour
         if (projectileObject == null)
             return;
 
-        firePoint.localPosition = new Vector2(firePointInitialPos.x + Random.Range(-firePointRandomOffset, firePointRandomOffset), firePointInitialPos.y + Random.Range(-firePointRandomOffset, firePointRandomOffset));
+        firePoint.localPosition = new Vector2(firePointInitialPos.x + Random.Range(-firePointRandomOffsetX, firePointRandomOffsetX), firePointInitialPos.y + Random.Range(-firePointRandomOffsetY, firePointRandomOffsetY));
 
         GameObject clone = Instantiate(projectileObject, firePoint.transform.position, Quaternion.identity);
         Projectile projectile = clone.GetComponent<Projectile>();
@@ -35,5 +36,28 @@ public class SpawnProjectile : MonoBehaviour
         }
 
         projectile.input.x = transform.parent.localScale.x;        
+    }
+
+    void AnimationSpawnThrowingKnives()
+    {
+        if (projectileObject == null)
+            return;
+
+        firePoint.localPosition = new Vector2(firePointInitialPos.x + Random.Range(-firePointRandomOffsetX, firePointRandomOffsetX), firePointInitialPos.y + Random.Range(-firePointRandomOffsetY, 0));
+
+        GameObject clone = Instantiate(projectileObject, firePoint.transform.position, Quaternion.identity);
+        Projectile projectile = clone.GetComponent<Projectile>();
+        clone.transform.localScale = new Vector2(transform.parent.localScale.x, Random.value > 0.5f ? 1 : -1);
+
+        if (transform.root.GetComponent<LivingCreature>() != null)
+        {
+            projectile.creature = transform.root.GetComponent<LivingCreature>();
+        }
+        else if (transform.parent.GetComponent<LivingCreature>() != null)
+        {
+            projectile.creature = transform.parent.GetComponent<LivingCreature>();
+        }
+
+        projectile.input.x = transform.parent.localScale.x;
     }
 }

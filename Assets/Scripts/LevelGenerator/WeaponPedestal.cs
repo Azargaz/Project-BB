@@ -8,8 +8,11 @@ public class WeaponPedestal : MonoBehaviour
     Text promptText;
     public int weaponId;
     int weaponIdStored;
-    public bool playerHasChosenWeapon;    
-    
+    public bool playerHasChosenWeapon;
+    [HideInInspector]
+    public bool rerollPedestal;
+    public Sprite rerollSprite;
+
     GameObject player;
     public GameObject prompt;
     public SpriteRenderer weaponPedestalSpriteRenderer;
@@ -22,10 +25,16 @@ public class WeaponPedestal : MonoBehaviour
 
     void Update ()
     {
-        if (weaponPedestalSpriteRenderer != null && WeaponManager.wp.weapons[weaponId] != null && prompt != null && promptText != null)
+        if (!rerollPedestal && weaponPedestalSpriteRenderer != null && WeaponManager.wp.weapons[weaponId] != null && prompt != null && promptText != null)
         {
             weaponPedestalSpriteRenderer.sprite = WeaponManager.wp.weapons[weaponId].sprite;
-            promptText.text = (playerHasChosenWeapon ? "" : "Choose one weapon and defeat powerful monster to escape\n") + WeaponManager.wp.weapons[weaponId].name + "\nPress Q to pickup";
+            promptText.text = (playerHasChosenWeapon ? "" : "Choose one weapon and defeat powerful monster to escape\n") + WeaponManager.wp.weapons[weaponId].Name + "\nPress Q to pickup";
+        }
+        else if(rerollPedestal && weaponPedestalSpriteRenderer != null && prompt != null && promptText != null)
+        {
+            if(rerollSprite != null)
+                weaponPedestalSpriteRenderer.sprite = rerollSprite;
+            promptText.text = "Reroll for three other weapons\nCost: 1SP\nPress Q to reroll.";
         }
 
         if (player != null)
@@ -42,10 +51,17 @@ public class WeaponPedestal : MonoBehaviour
         if (player == null)
             return;
 
-        WeaponPedestalController.WPC.Activate(this);
-        weaponIdStored = player.GetComponentInChildren<WeaponManager>().currentWeapon;
-        player.GetComponentInChildren<WeaponManager>().currentWeapon = weaponId;
-        weaponId = weaponIdStored;
+        if(!rerollPedestal)
+        {
+            WeaponPedestalController.WPC.Activate(this);
+            weaponIdStored = WeaponManager.wp.currentWeapon;
+            WeaponManager.wp.currentWeapon = weaponId;
+            weaponId = weaponIdStored;
+        }
+        else
+        {
+            WeaponPedestalController.WPC.RerollWeapons();
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)

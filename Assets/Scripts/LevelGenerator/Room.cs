@@ -1,19 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Text;
-using System.IO;
 
 public class Room : MonoBehaviour
 {
     public int roomType = 1;
-    int roomHeight = 0;
-    public int roomLayoutsCount;
+    int roomSize = 0;
     public GameObject background;
-    public GameObject ground;
-    public GameObject platform;
-    public GameObject spikes;
-    public GameObject weaponPedestal;
+    GameObject ground;
+    GameObject platform;
+    GameObject spikes;
+    GameObject weaponPedestal;
     public GameObject exit;
     bool exitSpawned;
     public string[] layout = new string[16];
@@ -22,11 +19,27 @@ public class Room : MonoBehaviour
     public List<Vector2> platformsFields = new List<Vector2>();
     bool blocked;
     List<GameObject> blockade = new List<GameObject>();
+    public ImportRoomLayouts RT;
 
-    void Awake ()
+    void Awake()
     {
-        Load("assets/_roomlayouts/type" + roomType + "/" + Random.Range(0, roomLayoutsCount) + ".txt");        
-	}
+        if(RT != null)
+        {
+            background = RT.background;
+            ground = RT.ground;
+            platform = RT.platform;
+            spikes = RT.spikes;
+            weaponPedestal = RT.weaponPedestal;
+            exit = RT.exit;
+
+            ImportRoomLayouts.Room thisRoomType = RT.roomTypes[roomType];
+            roomSize = thisRoomType.roomSize;
+            
+            layout = thisRoomType.layouts[Random.Range(0, thisRoomType.layouts.Count)].layout;
+        }
+
+        SpawnRoom(layout);
+    }
 
     public void BlockRoom()
     {
@@ -35,11 +48,11 @@ public class Room : MonoBehaviour
 
         blocked = true;
 
-        for (int i = 0; i < roomHeight; i++)
+        for (int i = 0; i < roomSize; i++)
         {
-            for (int j = 0; j < roomHeight; j++)
+            for (int j = 0; j < roomSize; j++)
             {
-                if((i == 0 || i == roomHeight - 1) && (j != 0 && j != roomHeight - 1))
+                if((i == 0 || i == roomSize - 1) && (j != 0 && j != roomSize - 1))
                 {
                     GameObject clone = Instantiate(ground, transform);
                     clone.transform.localPosition = new Vector2(i, j);
@@ -47,7 +60,7 @@ public class Room : MonoBehaviour
                     blockade.Add(clone);
                 }
 
-                if ((j == 0 || j == roomHeight - 1) && (i != 0 && i != roomHeight - 1))
+                if ((j == 0 || j == roomSize - 1) && (i != 0 && i != roomSize - 1))
                 {
                     GameObject clone = Instantiate(ground, transform);
                     clone.transform.localPosition = new Vector2(i, j);
@@ -79,8 +92,16 @@ public class Room : MonoBehaviour
             return;
         }
 
+        int infinityBreak = 0;
         do
         {
+            infinityBreak++;
+            if (infinityBreak > 10)
+            {
+                Debug.LogError("Couldn't spawn exit, infinite loop in SpawnExit()");
+                break;
+            }
+
             for (int i = 0; i < emptySpaces.Count; i++)
             {
                 if(emptySpaces.Contains(new Vector2(emptySpaces[i].x, emptySpaces[i].y - 1)) || ignoreFields.Contains(new Vector2(emptySpaces[i].x, emptySpaces[i].y - 1)))
@@ -176,37 +197,4 @@ public class Room : MonoBehaviour
             }
         }
     }
-
-    private bool Load(string fileName)
-    {       
-        string line;
-        StreamReader theReader = new StreamReader(fileName, Encoding.Default);
-
-        using (theReader)
-        {
-            do
-            {
-                line = theReader.ReadLine();
-
-                if (line != null)
-                {
-                    string[] entries = line.Split(',');
-                    if (entries.Length > 0)
-                    {
-                        for (int i = 0; i < entries.Length; i++)
-                        {
-                            layout[roomHeight] += entries[i];
-                        }
-                    }
-                    roomHeight++;
-                }
-            }
-            while (line != null);
-   
-            theReader.Close();
-            SpawnRoom(layout);
-            return true;
-        }
-    }
 }
-

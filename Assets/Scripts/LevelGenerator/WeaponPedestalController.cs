@@ -12,6 +12,8 @@ public class WeaponPedestalController : MonoBehaviour
     [HideInInspector]
     public List<WeaponPedestal> weaponPedestals;
     List<int> usedWeaponIDs = new List<int>();
+    List<int> usedWeaponIDs2 = new List<int>();
+    bool switchUsedWeapons = false;
     public WeaponDrops[] weaponDropChances;
     public bool initializeWeaponPedestals;
     public static WeaponPedestalController WPC;
@@ -56,6 +58,60 @@ public class WeaponPedestalController : MonoBehaviour
         }
     }
 
+    public void RerollWeapons()
+    {
+        Reroll();
+    }
+
+    void Reroll()
+    {
+        switchUsedWeapons = !switchUsedWeapons;
+
+        if(switchUsedWeapons)
+        {
+            usedWeaponIDs.Add(WeaponManager.wp.currentWeapon);
+            usedWeaponIDs2.Clear();
+        }
+        else
+        {
+            usedWeaponIDs2.Add(WeaponManager.wp.currentWeapon);
+            usedWeaponIDs.Clear();
+        }
+
+        for (int i = 0; i < weaponPedestals.Count; i++)
+        {
+            if (i == weaponPedestals.Count - 1)
+            {
+                weaponPedestals[i].rerollPedestal = true;
+                break;
+            }
+
+            int ID;
+
+            if(switchUsedWeapons)
+            {
+                do
+                {
+                    ID = RollWithWeights(weaponDropChances);
+                }
+                while (usedWeaponIDs.Contains(ID));
+            }
+            else
+            {
+                do
+                {
+                    ID = RollWithWeights(weaponDropChances);
+                }
+                while (usedWeaponIDs2.Contains(ID));
+            }
+
+            usedWeaponIDs.Add(ID);
+            usedWeaponIDs2.Add(ID);
+
+            weaponPedestals[i].weaponId = ID;                
+        }
+    }
+
     void Initialize()
     {
         usedWeaponIDs.Clear();
@@ -63,6 +119,12 @@ public class WeaponPedestalController : MonoBehaviour
 
         for (int i = 0; i < weaponPedestals.Count; i++)
         {
+            if (i == weaponPedestals.Count - 1)
+            {
+                weaponPedestals[i].rerollPedestal = true;
+                break;
+            }
+
             int ID;
             
             do

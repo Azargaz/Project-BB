@@ -9,7 +9,7 @@ public class Projectile : DamageLivingCreature
     public Vector2 input;
     public float moveSpeed;
     public float lifeTime;
-
+    public float accelerationTime;
     float velocityXSmoothing;
     Vector2 velocity;
     Vector2 storedVelocity;
@@ -49,7 +49,7 @@ public class Projectile : DamageLivingCreature
             Destroy(gameObject);
 
         float targetVelocityX = input.x * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, 0.1f);
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, accelerationTime);
 
         controller.Move(velocity * Time.deltaTime);
     }

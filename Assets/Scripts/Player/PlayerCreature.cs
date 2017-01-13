@@ -11,18 +11,8 @@ public class PlayerCreature : LivingCreature
     public WeaponManager weaponM;
     bool cheatMode = false;
 
-    #region Time stop
-    bool timeStopped = false;
-    public float timeStoppedDuration;
-    GameObject timeStopHUD;
-    float timeStoppedTimeLeft;
-    int stoppedMobsCount = 0;
-    int stoppedProjectilesCount = 0;
-    #endregion
-
     void Awake()
     {
-        timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
         DontDestroyOnLoad(this);
         anim = GetComponent<Animator>();
         stats.Initialize();
@@ -36,55 +26,6 @@ public class PlayerCreature : LivingCreature
             return;
 
         base.Update();
-
-        #region Time stop
-
-        if(timeStopHUD == null)
-            timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
-        else
-        {
-            timeStopHUD.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
-            timeStopHUD.GetComponent<Animator>().SetBool("TimeStopped", timeStopped);
-        }
-
-        if (timeStopped)
-        {
-            StopMobsAndProjectiles(true);
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            timeStopped = !timeStopped;
-
-            if (timeStopped)
-            {
-                stats.Invincibility(timeStoppedDuration);
-                timeStoppedTimeLeft = timeStoppedDuration;
-            }
-            else
-            {
-                stats.invincibilityTime = 0;
-                timeStoppedTimeLeft = 0;
-            }
-
-            StopMobsAndProjectiles(false);
-        }
-
-        if(timeStoppedTimeLeft > 0)
-        {            
-            timeStoppedTimeLeft -= Time.deltaTime;
-        }
-        else
-        {
-            if (timeStopped)
-            {
-                timeStopped = false;
-
-                StopMobsAndProjectiles(false);
-            }
-        }
-
-        #endregion
 
         #region Invincibility cheat
 
@@ -100,7 +41,7 @@ public class PlayerCreature : LivingCreature
 
         #endregion
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetButtonDown("Submit"))
             RestartGame();
 
         stats.damage = weaponM.equippedWeapon.crit ? weaponM.equippedWeapon.criticalDamage : weaponM.equippedWeapon.baseDamage;
@@ -129,44 +70,6 @@ public class PlayerCreature : LivingCreature
 
         #endregion
     }
-
-    #region Time stop
-
-    void StopMobsAndProjectiles(bool count)
-    {
-        List<GameObject> mobs = GameManager.instance.monsters;
-        List<GameObject> projectiles = GameManager.instance.flyingProjectiles;
-
-        if ((stoppedMobsCount < mobs.Count && count) || !count)
-        {
-            for (int i = 0; i < mobs.Count; i++)
-            {
-                if (mobs[i] != null && mobs[i].GetComponent<EnemyAI>() != null)
-                {
-                    mobs[i].GetComponent<EnemyAI>().freeze = timeStopped;
-                }
-            }
-
-            if(timeStopped)
-                stoppedMobsCount = mobs.Count;
-        }
-
-        if ((stoppedProjectilesCount < projectiles.Count && count) || !count)
-        {
-            for (int i = 0; i < projectiles.Count; i++)
-            {
-                if (projectiles[i] != null && projectiles[i].GetComponent<Projectile>() != null)
-                {
-                    projectiles[i].GetComponent<Projectile>().freeze = timeStopped;
-                }
-            }
-
-            if (timeStopped)
-                stoppedProjectilesCount = projectiles.Count;
-        }
-    }
-
-    #endregion
 
     #region Restore health
 
