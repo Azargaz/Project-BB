@@ -44,8 +44,14 @@ public class PlayerCreature : LivingCreature
         if (Input.GetButtonDown("Submit"))
             RestartGame();
 
-        stats.damage = weaponM.equippedWeapon.crit ? weaponM.equippedWeapon.criticalDamage : weaponM.equippedWeapon.baseDamage;
-        stats.knockbackPower = weaponM.equippedWeapon.knockbackPower;        
+        stats.damage = weaponM.equippedWeapon.crit ? weaponM.equippedWeapon.criticalDamage : weaponM.equippedWeapon.baseDamage;        
+        stats.knockbackPower = weaponM.equippedWeapon.knockbackPower;
+
+        if (controller.secondaryAttack)
+        {
+            stats.damage = weaponM.equippedWeapon.secondaryCrit ? weaponM.equippedWeapon.secondaryCriticalDamage : weaponM.equippedWeapon.secondaryBaseDamage;
+            stats.knockbackPower = weaponM.equippedWeapon.secondaryKnockbackPower;
+        }
 
         #region Restore health
 

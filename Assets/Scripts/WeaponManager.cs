@@ -27,6 +27,7 @@ public class WeaponManager : MonoBehaviour
         public bool crit; // Used for crits, if true next attack will be critical
         public int comboHits = 0; // Number of additional hits
         public float attackSpeed = 1; // Speed of player's and swings' animations
+        public bool chargable;
 
         [Header("Secondary attack")]
         public int secondaryBaseDamage;
@@ -43,6 +44,7 @@ public class WeaponManager : MonoBehaviour
         public bool secondaryCrit; // Used for crits, if true next attack will be critical
         public int secondaryComboHits = 0; // Number of additional hits
         public float secondaryAttackSpeed = 1; // Speed of player's and swings' animations
+        public bool secondaryChargable;
 
         [Header("Other")]
         public Sprite sprite; // Sprite of weapon     

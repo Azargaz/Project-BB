@@ -31,11 +31,15 @@ public class Player : MonoBehaviour
     PlayerCreature creature;
     LivingCreature.Statistics stats;
     WeaponManager weaponM;
-    bool secondaryAttack = false;
+    [HideInInspector]
+    public bool secondaryAttack = false;
+    bool attacked = false;
     Transform trail;
     Animator anim;
     public int facing = 1;
     public bool freeze;
+    Vector2 mousePos;
+    int mouseSide;
 
     void Start()
     {
@@ -44,7 +48,7 @@ public class Player : MonoBehaviour
         creature = GetComponent<PlayerCreature>();
         stats = creature.stats;
         anim = GetComponent<Animator>();
-        weaponM = transform.GetComponentInChildren<WeaponManager>();
+        weaponM = transform.GetComponentInChildren<WeaponManager>();        
 
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
@@ -70,6 +74,11 @@ public class Player : MonoBehaviour
         }
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mouseSide = (mousePos.x - transform.position.x) >= 0 ? 1 : -1;
+
+        if (InputControl.UsingGamepad())
+            mouseSide = Input.GetAxisRaw("XC Right Stick X") == 0 ? 0 : Input.GetAxisRaw("XC Right Stick X") > 0 ? 1 : -1;
 
         // Dashing            
         if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
@@ -81,13 +90,20 @@ public class Player : MonoBehaviour
 
         if(!anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
+            attacked = false;            
+
             if (Input.GetButtonDown("Fire1") && stats.curStamina >= weaponM.equippedWeapon.useStaminaCost)
-            {
+            {               
                 WeaponManager.wp.RollCritical(true);
                 anim.SetFloat("AttackSpeed", weaponM.equippedWeapon.attackSpeed);
                 anim.SetFloat("AttackId", (float)(weaponM.weapons[weaponM.currentWeapon].attackType + (weaponM.equippedWeapon.comboHits > 0 ? hitCount : 0)) / 10f);
                 secondaryAttack = false;
                 anim.SetTrigger("Attack");
+
+                if (weaponM.equippedWeapon.chargable)
+                {
+                    AttackCharge();
+                }
             }
             else if (Input.GetButtonDown("Fire2") && weaponM.equippedWeapon.secondaryAttack && stats.curStamina >= weaponM.equippedWeapon.secondaryUseStaminaCost)
             {
@@ -96,6 +112,36 @@ public class Player : MonoBehaviour
                 anim.SetFloat("AttackId", (float)(weaponM.equippedWeapon.secondaryType + (weaponM.equippedWeapon.secondaryComboHits > 0 ? secondaryHitCount : 0)) / 10f);
                 secondaryAttack = true;
                 anim.SetTrigger("Attack");
+
+                if (weaponM.equippedWeapon.secondaryChargable)
+                {
+                    AttackCharge();
+                }
+            }            
+        }
+
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+        {
+            if (weaponM.equippedWeapon.chargable)
+            {
+                if (Input.GetButtonUp("Fire1") && !attacked)
+                {
+                    anim.SetTrigger("BreakCharging");
+                    hitCount = 0;
+                    GameObject aoe = weaponM.equippedWeapon.aoeObject[0];
+                    aoe.GetComponentInChildren<Animator>().SetTrigger("BreakCharging");
+                }
+            }
+
+            if (weaponM.equippedWeapon.secondaryChargable)
+            {
+                if (Input.GetButtonUp("Fire2") && !attacked)
+                {
+                    anim.SetTrigger("BreakCharging");
+                    secondaryHitCount = 0;
+                    GameObject aoe = weaponM.equippedWeapon.secondaryAoeObject[0];
+                    aoe.GetComponentInChildren<Animator>().SetTrigger("BreakCharging");
+                }
             }
         }
 
@@ -105,22 +151,27 @@ public class Player : MonoBehaviour
 
         anim.SetFloat("Input", Mathf.Abs(input.x));
         anim.SetBool("Grounded", controller.collisions.below);
-        
-        if (creature.stats.stunned || creature.stats.animationBusy)
-        {
-            input = Vector2.zero;
-        }
 
         #region Fliping sprite
 
         if (input.x != 0 && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
         {
             facing = input.x > 0 ? 1 : -1;
-        }         
+        }
+
+        if (input.x == 0 && mouseSide != 0 && !anim.GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+        {            
+            facing = mouseSide;
+        }
 
         FlipAllSprites();
 
         #endregion
+
+        if (creature.stats.stunned || creature.stats.animationBusy)
+        {
+            input = Vector2.zero;
+        }
 
         #endregion
 
@@ -217,6 +268,10 @@ public class Player : MonoBehaviour
     void AnimationAttackSlash()
     {
         AnimationDrainStamina();
+        attacked = true;
+
+        if (mouseSide != 0)
+            facing = mouseSide;
 
         if (!secondaryAttack)
         {           
@@ -233,7 +288,8 @@ public class Player : MonoBehaviour
             WeaponManager.Weapon eqW = weaponM.equippedWeapon;
             if (!eqW.secondaryAttack)
                 return;
-            if (eqW.comboHits <= 0)
+
+            if (eqW.secondaryComboHits <= 0)
                 secondaryHitCount = 0;
 
             GameObject aoe = weaponM.equippedWeapon.secondaryAoeObject[secondaryHitCount > 0 ? secondaryHitCount : 0];
@@ -242,8 +298,39 @@ public class Player : MonoBehaviour
         }        
     }
 
-    void AttackSlash(int comboHits, ref int _hitCount, float atkSpeed, bool crit, GameObject aoeObject, bool special, float specialDelay)
+    void AttackCharge()
     {
+        if (mouseSide != 0)
+            facing = mouseSide;
+
+        if (!secondaryAttack)
+        {
+            WeaponManager.Weapon eqW = weaponM.equippedWeapon;
+
+            if (eqW.comboHits <= 0)
+                hitCount = 0;
+
+            GameObject aoe = weaponM.equippedWeapon.aoeObject[0];
+            AttackSlash(eqW.comboHits, ref hitCount, eqW.attackSpeed, eqW.crit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+            return;
+        }
+        else
+        {
+            WeaponManager.Weapon eqW = weaponM.equippedWeapon;
+            if (!eqW.secondaryAttack)
+                return;
+
+            if (eqW.secondaryComboHits <= 0)
+                secondaryHitCount = 0;
+
+            GameObject aoe = weaponM.equippedWeapon.secondaryAoeObject[0];
+            AttackSlash(eqW.secondaryComboHits, ref secondaryHitCount, eqW.secondaryAttackSpeed, eqW.secondaryCrit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+            return;
+        }
+    }
+
+    void AttackSlash(int comboHits, ref int _hitCount, float atkSpeed, bool crit, GameObject aoeObject, bool special, float specialDelay)
+    {        
         int numberOfHits = comboHits;
 
         if (numberOfHits <= 0)
@@ -304,9 +391,8 @@ public class Player : MonoBehaviour
             //Daggers
             case 2:
                 {
-                    WeaponManager.Weapon eqW = weaponM.equippedWeapon;
-                    GameObject aoe = weaponM.equippedWeapon.aoeObject[hitCount > 0 ? hitCount : 0];
-                    AttackSlash(eqW.comboHits, ref hitCount, eqW.attackSpeed, eqW.crit, aoe, eqW.weaponSpecialActive, eqW.weaponSpecialDelay);
+                    AnimationAttackStep(weaponM.daggersDashDistance);
+                    facing = -facing;
                     break;
                 }
             //Katana

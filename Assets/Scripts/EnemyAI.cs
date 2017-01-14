@@ -269,7 +269,7 @@ public class EnemyAI : MonoBehaviour
 
     protected void OnPathComplete(Path p)
     {
-        Debug.Log("Path ready. Any errors go here >>> " + (p.error ? "panic mode: on" : "trash"));
+        //Debug.Log("Path ready. Any errors go here >>> " + (p.error ? "panic mode: on" : "trash"));
         if (!p.error)
         {
             path = p;
@@ -292,7 +292,7 @@ public class EnemyAI : MonoBehaviour
         {
             if (currentWaypoint >= path.vectorPath.Count)
             {
-                Debug.Log("End of path reached.");
+                //Debug.Log("End of path reached.");
                 pathIsEnded = true;
             }
             else

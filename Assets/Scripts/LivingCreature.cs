@@ -86,7 +86,7 @@ public abstract class LivingCreature : MonoBehaviour
             if(duration == 0)
                 duration = defaultInvincibilityDuration;
 
-            invincibilityTime += duration;
+            invincibilityTime = duration;
         }
     }
 
