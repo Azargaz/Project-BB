@@ -69,12 +69,12 @@ public class WeaponPedestalController : MonoBehaviour
 
         if(switchUsedWeapons)
         {
-            usedWeaponIDs.Add(WeaponManager.wp.currentWeapon);
+            usedWeaponIDs.Add(WeaponController.wc.currentWeapon);
             usedWeaponIDs2.Clear();
         }
         else
         {
-            usedWeaponIDs2.Add(WeaponManager.wp.currentWeapon);
+            usedWeaponIDs2.Add(WeaponController.wc.currentWeapon);
             usedWeaponIDs.Clear();
         }
 
@@ -115,7 +115,7 @@ public class WeaponPedestalController : MonoBehaviour
     void Initialize()
     {
         usedWeaponIDs.Clear();
-        usedWeaponIDs.Add(WeaponManager.wp.currentWeapon);
+        usedWeaponIDs.Add(WeaponController.wc.currentWeapon);
 
         for (int i = 0; i < weaponPedestals.Count; i++)
         {
@@ -125,8 +125,8 @@ public class WeaponPedestalController : MonoBehaviour
                 break;
             }
 
-            int ID;
-            
+            int ID = 0;
+
             do
             {
                 ID = RollWithWeights(weaponDropChances);

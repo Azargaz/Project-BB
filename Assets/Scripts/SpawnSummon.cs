@@ -26,18 +26,19 @@ public class SpawnSummon : MonoBehaviour
 	void AnimationSummon()
     {
         GameObject clone = Instantiate(summon, spawnPoint.position, Quaternion.identity);
+        LivingCreature.Statistics stats = clone.GetComponent<SummonCreature>().stats;
+        WeaponController.Weapon.Attack atk = WeaponController.wc.eqWeaponCurAttack;
+        stats.damage = atk.baseDamage;
 
-        if (WeaponManager.wp.equippedWeapon.secondaryCrit)
+        if (atk.crit)
         {
             Color swingColor = clone.GetComponent<SpriteRenderer>().color;
             swingColor = new Color(1f, 0.5f, 0.5f);
             clone.GetComponent<SpriteRenderer>().color = swingColor;
 
-            float multiplier = WeaponManager.wp.equippedWeapon.secondaryCriticalMultiplier;
-            LivingCreature.Statistics stats = clone.GetComponent<SummonCreature>().stats;
-            stats.maxHealth = (int)(multiplier * stats.maxHealth);
-            stats.Initialize();
-            stats.damage = (int)(multiplier * stats.damage);            
+            stats.maxHealth = (int)(atk.criticalMultiplier * stats.maxHealth);
+            stats.Initialize();            
+            stats.damage = atk.criticalDamage;            
         }
 
         clone.transform.parent = GameObject.Find("PlayerSummons").transform;

@@ -14,6 +14,6 @@ public class WeaponSpriteHUD : MonoBehaviour
 
 	void Update ()
     {
-        img.sprite = WeaponManager.wp.equippedWeapon.sprite;
+        img.sprite = WeaponController.wc.equippedWeapon.sprite;
 	}
 }

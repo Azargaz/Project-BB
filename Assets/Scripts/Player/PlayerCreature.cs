@@ -8,7 +8,7 @@ public class PlayerCreature : LivingCreature
     Animator anim;
     Player controller;
     [HideInInspector]
-    public WeaponManager weaponM;
+    WeaponController wc;
     bool cheatMode = false;
 
     void Awake()
@@ -17,7 +17,7 @@ public class PlayerCreature : LivingCreature
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<Player>();
-        weaponM = transform.GetComponentInChildren<WeaponManager>();
+        wc = GetComponentInChildren<WeaponController>();
     }
 
     protected override void Update()
@@ -44,14 +44,9 @@ public class PlayerCreature : LivingCreature
         if (Input.GetButtonDown("Submit"))
             RestartGame();
 
-        stats.damage = weaponM.equippedWeapon.crit ? weaponM.equippedWeapon.criticalDamage : weaponM.equippedWeapon.baseDamage;        
-        stats.knockbackPower = weaponM.equippedWeapon.knockbackPower;
-
-        if (controller.secondaryAttack)
-        {
-            stats.damage = weaponM.equippedWeapon.secondaryCrit ? weaponM.equippedWeapon.secondaryCriticalDamage : weaponM.equippedWeapon.secondaryBaseDamage;
-            stats.knockbackPower = weaponM.equippedWeapon.secondaryKnockbackPower;
-        }
+        WeaponController.Weapon.Attack atk = wc.eqWeaponCurAttack;
+        stats.damage = atk.crit ? atk.criticalDamage : atk.baseDamage;
+        stats.knockbackPower = atk.knockbackPower;
 
         #region Restore health
 

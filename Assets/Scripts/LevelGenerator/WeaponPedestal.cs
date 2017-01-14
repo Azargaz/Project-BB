@@ -25,10 +25,10 @@ public class WeaponPedestal : MonoBehaviour
 
     void Update ()
     {
-        if (!rerollPedestal && weaponPedestalSpriteRenderer != null && WeaponManager.wp.weapons[weaponId] != null && prompt != null && promptText != null)
+        if (!rerollPedestal && weaponPedestalSpriteRenderer != null && WeaponController.wc.weapons[weaponId] != null && prompt != null && promptText != null)
         {
-            weaponPedestalSpriteRenderer.sprite = WeaponManager.wp.weapons[weaponId].sprite;
-            promptText.text = (playerHasChosenWeapon ? "" : "Choose one weapon and defeat powerful monster to escape\n") + WeaponManager.wp.weapons[weaponId].Name + "\nPress Q to pickup";
+            weaponPedestalSpriteRenderer.sprite = WeaponController.wc.weapons[weaponId].sprite;
+            promptText.text = (playerHasChosenWeapon ? "" : "Choose one weapon and defeat powerful monster to escape\n") + WeaponController.wc.weapons[weaponId].Name + "\nPress Q to pickup";
         }
         else if(rerollPedestal && weaponPedestalSpriteRenderer != null && prompt != null && promptText != null)
         {
@@ -54,8 +54,8 @@ public class WeaponPedestal : MonoBehaviour
         if(!rerollPedestal)
         {
             WeaponPedestalController.WPC.Activate(this);
-            weaponIdStored = WeaponManager.wp.currentWeapon;
-            WeaponManager.wp.currentWeapon = weaponId;
+            weaponIdStored = WeaponController.wc.currentWeapon;
+            WeaponController.wc.currentWeapon = weaponId;
             weaponId = weaponIdStored;
         }
         else

@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
             if (player == null)
             {
                 player = Instantiate(playerPrefab);
-                WeaponManager.wp.currentWeapon = startingWeapon;
+                WeaponController.wc.currentWeapon = startingWeapon;
                 player.transform.position = new Vector3(0, 6, 0);
             }
 

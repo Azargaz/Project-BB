@@ -158,7 +158,7 @@ public abstract class LivingCreature : MonoBehaviour
                 GameObject clone = Instantiate(damageDisplay, transform.position, Quaternion.identity);
                 
                 if(dmgSource is PlayerCreature)
-                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString() + (WeaponManager.wp.equippedWeapon.crit ? "!" : "");
+                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString() + (WeaponController.wc.eqWeaponCurAttack.crit ? "!" : "");
                 else
                     clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString();
 
