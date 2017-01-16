@@ -62,7 +62,7 @@ public class EnemyAI : MonoBehaviour
     {
         if(playerTarget == null)
         {
-            playerTarget = GameObject.FindGameObjectWithTag("Player").transform;
+            playerTarget = GameManager.player.transform;
             target = playerTarget;
         }
 

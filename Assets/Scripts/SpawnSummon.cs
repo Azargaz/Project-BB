@@ -29,6 +29,7 @@ public class SpawnSummon : MonoBehaviour
         LivingCreature.Statistics stats = clone.GetComponent<SummonCreature>().stats;
         WeaponController.Weapon.Attack atk = WeaponController.wc.eqWeaponCurAttack;
         stats.damage = atk.baseDamage;
+        stats.knockbackPower = atk.knockbackPower;
 
         if (atk.crit)
         {

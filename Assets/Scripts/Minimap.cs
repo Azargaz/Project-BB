@@ -26,14 +26,14 @@ public class Minimap : MonoBehaviour
         _texture.filterMode = FilterMode.Point;
         GetComponent<RawImage>().texture = _texture;
         texture = _texture;
-        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        playerTransform = GameManager.player.transform;
 	}
 
 	void Update ()
     {
         if(playerTransform == null)
         {
-            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+            playerTransform = GameManager.player.transform;
             return;
         }
 

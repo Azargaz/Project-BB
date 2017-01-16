@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     Transform trail;
     Animator anim;
     public int facing = 1;
+    public bool canDash;
     public bool freeze;
     public bool mouseChangingDirections = false;
     Vector2 mousePos;
@@ -87,7 +88,7 @@ public class Player : MonoBehaviour
 
         #region Dashing
 
-        if(stats.alive)
+        if(stats.alive && canDash)
         {
             if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
             {

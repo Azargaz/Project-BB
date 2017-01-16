@@ -12,6 +12,7 @@ public class WeaponPedestal : MonoBehaviour
     [HideInInspector]
     public bool rerollPedestal;
     public Sprite rerollSprite;
+    public GameObject notEnoughCurrencyDisplay;
 
     GameObject player;
     public GameObject prompt;
@@ -34,7 +35,7 @@ public class WeaponPedestal : MonoBehaviour
         {
             if(rerollSprite != null)
                 weaponPedestalSpriteRenderer.sprite = rerollSprite;
-            promptText.text = "Reroll for three other weapons\n\nPress Q to reroll.";
+            promptText.text = "Reroll for three other weapons\nCost: " + CurrencyController.CC.rerollCost + "$\nPress Q to reroll.";
         }
 
         if (player != null)
@@ -60,7 +61,18 @@ public class WeaponPedestal : MonoBehaviour
         }
         else
         {
-            WeaponPedestalController.WPC.RerollWeapons();
+            if(CurrencyController.CC.RerollWeapons())
+                WeaponPedestalController.WPC.RerollWeapons();
+            else
+            {
+                if(notEnoughCurrencyDisplay != null)
+                {
+                    GameObject clone = Instantiate(notEnoughCurrencyDisplay, transform.position, Quaternion.identity);
+                    clone.GetComponent<Animator>().SetTrigger("Display");
+                    clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
+                    Destroy(clone, 1f);
+                }
+            }
         }
     }
 

@@ -118,6 +118,5 @@ public class HoveringGhostEnemyAI : EnemyAI
         GetComponent<SpriteRenderer>().flipX = facing < 0;
 
         anim.SetFloat("Input", Mathf.Abs(input));
-        //anim.SetBool("Grounded", controller.collisions.below);
     }
 }

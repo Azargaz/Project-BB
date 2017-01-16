@@ -13,7 +13,9 @@ public class GameManager : MonoBehaviour
     public List<GameObject> monsters = new List<GameObject>();
     public List<GameObject> flyingProjectiles;
     public bool pause;
+    bool passiveMenuOpen;
     GameObject pauseMenu;
+    GameObject passiveMenu;
 
     #region Currency
 
@@ -21,8 +23,6 @@ public class GameManager : MonoBehaviour
     float lastCurrentCurrency = 0;
     float displayCurrency = 0;
     float lerpRate = 0f;
-    float currentLerpTime;
-    float LerpTime = 2f;
 
     #endregion    
 
@@ -58,9 +58,26 @@ public class GameManager : MonoBehaviour
                 pauseMenu.SetActive(false);
             }
 
+            if(passiveMenu == null)
+            {
+                passiveMenu = GameObject.FindGameObjectWithTag("Passives");
+                passiveMenu.SetActive(false);
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button7))
             {
-                PauseUnPause();
+                if(!passiveMenuOpen)
+                    PauseUnPause(pauseMenu);
+            }
+
+            if(Input.GetKeyDown(KeyCode.Tab))
+            {
+                if(!pause || passiveMenuOpen)
+                {
+                    passiveMenuOpen = !passiveMenuOpen;
+
+                    PauseUnPause(passiveMenu);
+                }            
             }
 
             #region Currency
@@ -87,14 +104,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void PauseUnPause()
+    public void PauseUnPause(GameObject pauseScreen)
     {
         pause = !pause;
 
         Time.timeScale = pause ? 0 : 1;
 
-        if (pauseMenu != null)
-            pauseMenu.SetActive(pause);
+        if (pauseScreen != null)
+            pauseScreen.SetActive(pause);
 
         if(player != null)
         {
@@ -149,7 +166,13 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene(i);
 
         if (pause)
-            PauseUnPause();
+            PauseUnPause(null);
+
+        if (pauseMenu != null)
+            pauseMenu.SetActive(false);
+
+        if (passiveMenu != null)
+            passiveMenu.SetActive(false);
 
         if (i != 1)
             Destroy(gameObject);        
@@ -163,6 +186,7 @@ public class GameManager : MonoBehaviour
             {
                 player = Instantiate(playerPrefab);
                 WeaponController.wc.currentWeapon = startingWeapon;
+                CurrencyController.CC.ResetRerollCost();
                 player.transform.position = new Vector3(0, 6, 0);
             }
 
