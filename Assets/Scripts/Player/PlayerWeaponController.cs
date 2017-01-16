@@ -24,6 +24,9 @@ public class PlayerWeaponController : MonoBehaviour
 
     void Update()
     {
+        if (stats.pause)
+            return;
+
         eqWeapon = WeaponController.wc.equippedWeapon;
         playerAttackAnimation = playerAnim.GetCurrentAnimatorStateInfo(0).IsName("attack_player");        
 
@@ -31,7 +34,7 @@ public class PlayerWeaponController : MonoBehaviour
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                attackNumber = 1;
+                attackNumber = 1;                
             }
 
             if (Input.GetButtonDown("Fire2"))
@@ -39,6 +42,12 @@ public class PlayerWeaponController : MonoBehaviour
                 attackNumber = 2;
             }
         }
+
+        if (eqWeapon.attacks.Length >= attackNumber && attackNumber != 0)
+        {
+            if(eqWeapon.attacks[attackNumber - 1].staminaCost > stats.curStamina)
+                attackNumber = 0;
+        }            
 
         if (!playerAttackAnimation && attackNumber != 0 && WeaponController.wc.eqWeaponCurAttack.staminaCost <= stats.curStamina)
         {

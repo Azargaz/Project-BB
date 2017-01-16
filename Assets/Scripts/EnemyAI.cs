@@ -80,6 +80,9 @@ public class EnemyAI : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (creature.stats.pause)
+            return;
+
         if (freeze && creature.stats.alive)
         {
             anim.speed = Mathf.Lerp(anim.speed, 0, freezeSmoothTime);
@@ -99,10 +102,10 @@ public class EnemyAI : MonoBehaviour
         else
             target = playerTarget;
 
-        if (!creature.stats.alive)
-            return;
-
         currentState = pathfinding ? SearchTargetWithPathfinding() : SearchTarget();
+
+        if (!creature.stats.alive)
+            currentState = EnemyState.idle;
 
         // Attack & SearchPlayer cooldown
         attackTimer -= Time.deltaTime;

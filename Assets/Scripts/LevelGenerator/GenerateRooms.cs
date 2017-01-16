@@ -26,6 +26,12 @@ public class GenerateRooms : MonoBehaviour
     public float chanceToSpawnMonsters;
 
     Vector2 exitRoom;
+    [HideInInspector]
+    public List<Vector2> allEmptySpaces = new List<Vector2>();
+    [HideInInspector]
+    public List<Vector2> allPlatformFields = new List<Vector2>();
+    [HideInInspector]
+    public List<Vector2> allPedestals = new List<Vector2>();
     List<Vector2> emptySpaces = new List<Vector2>();
     HashSet<Vector2> emptySpacesHash = new HashSet<Vector2>();
     HashSet<Vector2> ignoreFieldsHash = new HashSet<Vector2>();
@@ -46,12 +52,14 @@ public class GenerateRooms : MonoBehaviour
     }
 
     ImportRoomLayouts RT;
+    public static GenerateRooms GR;
 
     [Header("")]
     public bool debug;
 
     void Awake()
     {
+        GR = this;
         RT = GameObject.FindGameObjectWithTag("RoomLayouts").GetComponent<ImportRoomLayouts>();
         numberOfRooms = (int) Mathf.Pow(sqrtNumberOfRooms, 2);
         rooms = new GameObject[sqrtNumberOfRooms, sqrtNumberOfRooms];
@@ -207,6 +215,7 @@ public class GenerateRooms : MonoBehaviour
                         }
 
                         #endregion
+
                         #region Spawning minibosses (type 6 room only, for now)
 
                         else
@@ -306,6 +315,12 @@ public class GenerateRooms : MonoBehaviour
                 rooms[x, y].GetComponent<Room>().RT = RT;
                 rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.FindChild("Rooms"));                
                 rooms[x, y].name = "R[" + x + ", " + y + "]" + " T[" + thisRoom.roomType + "]";
+                thisRoom = rooms[x, y].GetComponent<Room>();
+
+                allEmptySpaces.AddRange(thisRoom.emptySpaces);
+                allPlatformFields.AddRange(thisRoom.platformsFields);
+                if(thisRoom.weaponPedestals.Count > 0)
+                    allPedestals.AddRange(thisRoom.weaponPedestals);
 
                 if (new Vector2(x, y) == exitRoom)
                 {

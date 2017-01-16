@@ -54,14 +54,10 @@ public class Player : MonoBehaviour
 
     void Update()
     {
-        if (!stats.alive)
-        {
-            velocity.x = 0;
-            velocity.y += gravity * Time.deltaTime;
-            controller.Move(velocity * Time.deltaTime);
-        }
+        if (stats.pause)
+            return;
 
-        if (freeze || !stats.alive)
+        if (freeze)
             return;
 
         if (controller.collisions.above || controller.collisions.below)
@@ -72,23 +68,31 @@ public class Player : MonoBehaviour
 
         #region Input, mousePos
 
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        mouseSide = (mousePos.x - transform.position.x) >= 0 ? 1 : -1;
+        Vector2 input = Vector2.zero;
 
-        if (InputControl.UsingGamepad())
-            mouseSide = Input.GetAxisRaw("XC Right Stick X") == 0 ? 0 : Input.GetAxisRaw("XC Right Stick X") > 0 ? 1 : -1;
+        if (stats.alive)
+        {
+            input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            mouseSide = (mousePos.x - transform.position.x) >= 0 ? 1 : -1;
 
-        if(!mouseChangingDirections)
-            mouseSide = 0;
+            if (InputControl.UsingGamepad())
+                mouseSide = Input.GetAxisRaw("XC Right Stick X") == 0 ? 0 : Input.GetAxisRaw("XC Right Stick X") > 0 ? 1 : -1;
+
+            if (!mouseChangingDirections)
+                mouseSide = 0;
+        }
 
         #endregion
 
         #region Dashing
 
-        if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
+        if(stats.alive)
         {
-            anim.SetTrigger("Dashing");
+            if (Input.GetButtonDown("Dash") && stats.curStamina >= dashCost)
+            {
+                anim.SetTrigger("Dashing");
+            }
         }
 
         #endregion
@@ -141,18 +145,21 @@ public class Player : MonoBehaviour
         if (input.y < 0)
             controller.jumpDown = true;
 
-        if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
+        if(stats.alive)
         {
-            if (controller.collisions.below)
+            if (Input.GetButtonDown("Jump") && controller.collisions.below && !anim.GetCurrentAnimatorStateInfo(0).IsName("dash_player"))
             {
-                velocity.y = maxJumpVelocity;
-            }                       
-        }
-        if (Input.GetButtonUp("Jump"))
-        {
-            if (velocity.y > minJumpVelocity)
+                if (controller.collisions.below)
+                {
+                    velocity.y = maxJumpVelocity;
+                }
+            }
+            if (Input.GetButtonUp("Jump"))
             {
-                velocity.y = minJumpVelocity;
+                if (velocity.y > minJumpVelocity)
+                {
+                    velocity.y = minJumpVelocity;
+                }
             }
         }
 

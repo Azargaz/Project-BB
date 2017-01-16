@@ -23,6 +23,7 @@ public abstract class LivingCreature : MonoBehaviour
 
         public bool stunned;
         public bool animationBusy; // for animations
+        public bool pause; // for pausing game
         public bool alive;
         public bool invincible;
         public bool immovable;
@@ -103,6 +104,9 @@ public abstract class LivingCreature : MonoBehaviour
         if (!stats.alive)
             return;
 
+        if (stats.pause)
+            return;
+
         if (transform.position.y < -50)
         {
             Kill();
@@ -153,14 +157,18 @@ public abstract class LivingCreature : MonoBehaviour
         }
         else
         {
+            if (damageTaken > stats.curHealth)
+                damageTaken = stats.curHealth;
+
             if (damageDisplay != null)
             {
                 GameObject clone = Instantiate(damageDisplay, transform.position, Quaternion.identity);
-                
-                if(dmgSource is PlayerCreature)
-                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString() + (WeaponController.wc.eqWeaponCurAttack.crit ? "!" : "");
+                Text txt = clone.transform.GetChild(0).GetComponent<Text>();
+
+                if (dmgSource is PlayerCreature)
+                    txt.text = damageTaken.ToString() + (WeaponController.wc.eqWeaponCurAttack.crit ? "!" : "");
                 else
-                    clone.transform.GetChild(0).GetComponent<Text>().text = damageTaken.ToString();
+                    txt.text = damageTaken.ToString();
 
                 clone.GetComponent<Animator>().SetTrigger("Display");
                 clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);

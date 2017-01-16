@@ -21,7 +21,7 @@ public class ExitController : MonoBehaviour
 
     void GoToTheNextLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        GameManager.instance.LoadScene(1);
         GameManager.player.transform.position = new Vector3(0, 6, 0);
     }
 

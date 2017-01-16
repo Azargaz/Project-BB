@@ -16,6 +16,7 @@ public class Room : MonoBehaviour
     public string[] layout = new string[16];
     public List<Vector2> emptySpaces = new List<Vector2>();
     public List<Vector2> ignoreFields = new List<Vector2>();
+    public List<Vector2> weaponPedestals = new List<Vector2>();
     public List<Vector2> platformsFields = new List<Vector2>();
     bool blocked;
     List<GameObject> blockade = new List<GameObject>();
@@ -186,6 +187,7 @@ public class Room : MonoBehaviour
                     clone.transform.localPosition = new Vector2(j, layout.Length - i - 1);
 
                     ignoreFields.Add(clone.transform.position);
+                    weaponPedestals.Add(clone.transform.position);
 
                     if (background != null)
                     {

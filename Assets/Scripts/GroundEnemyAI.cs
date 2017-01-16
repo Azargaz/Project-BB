@@ -45,6 +45,9 @@ public class GroundEnemyAI : EnemyAI
     {
         base.Update();
 
+        if (creature.stats.pause)
+            return;
+
         if (freeze)
             return;
 

@@ -26,6 +26,9 @@ public class HoveringGhostEnemyAI : EnemyAI
     {
         base.Update();
 
+        if (creature.stats.pause)
+            return;
+
         if (freeze)
             return;
 

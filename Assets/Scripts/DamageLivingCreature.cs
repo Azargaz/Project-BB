@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class DamageLivingCreature : MonoBehaviour
-{        
+{            
+    public enum Target { enemy, player, all };
     [Header("Damage living creatures")]
-    public bool damagePlayer;
-    public bool damageAll;
+    public Target target;
     public bool ignoreFlying;
-
     public int damage;
     [HideInInspector]
     public LivingCreature creature;
@@ -41,18 +40,21 @@ public class DamageLivingCreature : MonoBehaviour
         if (other.GetComponent<LivingCreature>() == null)
             return;
 
-        LivingCreature target = other.GetComponent<LivingCreature>();
+        LivingCreature _target = other.GetComponent<LivingCreature>();
 
-        if (target == creature)
+        if (!_target.stats.alive)
             return;
 
-        if ((target is PlayerCreature || target is SummonCreature) && !damagePlayer && !damageAll)
+        if (_target == creature)
             return;
 
-        if (target is EnemyCreature && damagePlayer && !damageAll)
+        if ((_target is PlayerCreature || _target is SummonCreature) && target == Target.enemy)
             return;
 
-        bool hit = target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
+        if (_target is EnemyCreature && target == Target.player)
+            return;
+
+        bool hit = _target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
 
         if (hit)
             AfterHit();

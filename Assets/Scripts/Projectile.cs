@@ -16,6 +16,7 @@ public class Projectile : DamageLivingCreature
     Controller2D controller;
     float freezeSmoothTime = 0.05f;
     public bool freeze;
+    public bool pause;
 
     protected override void Awake()
     {
@@ -31,6 +32,9 @@ public class Projectile : DamageLivingCreature
 
     protected override void Update()
     {
+        if (pause)
+            return;
+
         if (lifeTime <= 0)
             Destroy(gameObject);
 

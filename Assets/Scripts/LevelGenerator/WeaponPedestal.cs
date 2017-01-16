@@ -34,7 +34,7 @@ public class WeaponPedestal : MonoBehaviour
         {
             if(rerollSprite != null)
                 weaponPedestalSpriteRenderer.sprite = rerollSprite;
-            promptText.text = "Reroll for three other weapons\nCost: 1SP\nPress Q to reroll.";
+            promptText.text = "Reroll for three other weapons\n\nPress Q to reroll.";
         }
 
         if (player != null)

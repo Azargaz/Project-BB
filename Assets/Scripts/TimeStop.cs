@@ -22,11 +22,14 @@ public class TimeStop : MonoBehaviour
 
 	void Update ()
     {
+        if (GameManager.instance.pause)
+            return;
+
         if (timeStopHUD == null)
             timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
         else
         {
-            timeStopHUD.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
+            //timeStopHUD.GetComponentInChildren<Text>().text = !timeStopped ? "Time is moving." : "Time is frozen for " + (timeStoppedTimeLeft > 0f ? Mathf.Ceil(timeStoppedTimeLeft) : 0f) + " seconds.";
             timeStopHUD.GetComponent<Animator>().SetBool("TimeStopped", timeStopped);
         }
 

@@ -48,36 +48,51 @@ public class PlayerCreature : LivingCreature
         stats.damage = atk.crit ? atk.criticalDamage : atk.baseDamage;
         stats.knockbackPower = atk.knockbackPower;
 
+        if (wc.equippedWeapon.Name.Contains("Scythe"))
+            RestoreHeatlhOn = true;
+        else
+            RestoreHeatlhOn = false;
+
         #region Restore health
 
-        if (timeToRH > 0)
-            timeToRH -= Time.deltaTime;
-        else
+        if(RestoreHeatlhOn)
         {
-            if(RHDecayIntervalTime <= 0)
-            {
-                RHDecayIntervalTime = RHDecayInterval;
-
-                if (healthToRestore >= RHDecayAmount)
-                    healthToRestore -= RHDecayAmount;
-                else
-                    healthToRestore = 0;
-            }
+            if (timeToRH > 0)
+                timeToRH -= Time.deltaTime;
             else
             {
-                RHDecayIntervalTime -= Time.deltaTime;
+                if (RHDecayIntervalTime <= 0)
+                {
+                    RHDecayIntervalTime = RHDecayInterval;
+
+                    if (healthToRestore >= RHDecayAmount)
+                        healthToRestore -= RHDecayAmount;
+                    else
+                        healthToRestore = 0;
+                }
+                else
+                {
+                    RHDecayIntervalTime -= Time.deltaTime;
+                }
             }
+        }
+        else
+        {
+            timeToRH = 0;
+            healthToRestore = 0;
         }
 
         #endregion
     }
 
     #region Restore health
-
+    
     [HideInInspector]
     public int healthToRestore = 0;
 
-    [Header("Restore Health mechanic")]    
+    [Header("Restore Health mechanic")]
+    [SerializeField]
+    bool RestoreHeatlhOn = false;
     [SerializeField]
     int RHAmount;
     [SerializeField]
@@ -88,9 +103,14 @@ public class PlayerCreature : LivingCreature
     [SerializeField]
     float timeForRH;
     float timeToRH;
+    [SerializeField]
+    GameObject healthRestoreDisplay;
 
     public void RestoreHealthAfterAttack()
     {
+        if (!RestoreHeatlhOn)
+            return;
+
         if (healthToRestore <= 0)
             return;
 
@@ -101,6 +121,17 @@ public class PlayerCreature : LivingCreature
             amount = healthToRestore;
         healthToRestore -= amount;
         stats.curHealth += amount;
+
+        if(healthRestoreDisplay != null)
+        {
+            GameObject clone = Instantiate(healthRestoreDisplay, transform.position, Quaternion.identity);
+            Text txt = clone.transform.GetChild(0).GetComponent<Text>();
+
+            txt.text = "+" + amount;
+            clone.GetComponent<Animator>().SetTrigger("Display");
+            clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
+            Destroy(clone, 1f);
+        }
     }
 
     #endregion
@@ -114,11 +145,14 @@ public class PlayerCreature : LivingCreature
 
         #region Restore Health
 
-        healthToRestore += damageTaken;
-        timeToRH = timeForRH;
-        
-        if (timeToRH <= 0)
+        if(RestoreHeatlhOn)
+        {
+            healthToRestore += damageTaken;
             timeToRH = timeForRH;
+
+            if (timeToRH <= 0)
+                timeToRH = timeForRH;
+        }
 
         #endregion
 
@@ -151,6 +185,7 @@ public class PlayerCreature : LivingCreature
     public override void Kill()
     {
         base.Kill();
+        CurrencyController.CC.ResetCurrency();
         anim.SetTrigger("Death");
         Debug.LogError("YOU DIED");
         StartCoroutine(GameManager.instance.GameOver());

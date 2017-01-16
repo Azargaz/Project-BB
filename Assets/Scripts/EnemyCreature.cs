@@ -10,7 +10,7 @@ public class EnemyCreature : LivingCreature
     GameObject deathParticles;
     Animator anim;
     EnemyAI controller;
-    public int Score;
+    public int currency;
 
     void Awake()
     {        
@@ -77,7 +77,7 @@ public class EnemyCreature : LivingCreature
             Destroy(clone, 3f);
         }
 
-        GameManager.Score += Score;
+        CurrencyController.CC.AddCurrency(currency);
 
         if (anim != null)
             anim.SetTrigger("Death");

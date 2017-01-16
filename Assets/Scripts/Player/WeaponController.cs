@@ -51,7 +51,7 @@ public class WeaponController : MonoBehaviour
             public AttackAnimations[] type; // Type of animation used with this attack            
             public Animator[] chargeAnim;
             public Animator[] aoeAnim;
-            [Range(-100f, 100f)]
+            [Range(0f, 2f)]
             public float attackSpeed = 1; // Speed of attack animations
             
             public bool chargable = false; // Can this attack be charged?
@@ -124,8 +124,10 @@ public class WeaponController : MonoBehaviour
     void Update()
     {
         equippedWeapon = weapons[currentWeapon];
+
         if (currentAttack > equippedWeapon.attacks.Length)
             currentAttack = 0;
+
         eqWeaponCurAttack = equippedWeapon.attacks[currentAttack];
     }
 }
