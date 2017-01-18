@@ -41,19 +41,9 @@ public class PlayerCreature : LivingCreature
 
         #endregion
 
-        if (Input.GetButtonDown("Submit"))
-            RestartGame();
-
-        WeaponController.Weapon.Attack atk = wc.eqWeaponCurAttack;
-        stats.damage = atk.crit ? atk.criticalDamage : atk.baseDamage;
-        stats.knockbackPower = atk.knockbackPower;
-
-        if (wc.equippedWeapon.Name.Contains("Scythe"))
-            RestoreHeatlhOn = true;
-        else
-            RestoreHeatlhOn = false;
-
         #region Restore health
+
+        RestoreHeatlhOn = WeaponController.wc.equippedWeapon.restoreHealthMechanic;
 
         if(RestoreHeatlhOn)
         {
@@ -91,8 +81,7 @@ public class PlayerCreature : LivingCreature
     public int healthToRestore = 0;
 
     [Header("Restore Health mechanic")]
-    [SerializeField]
-    bool RestoreHeatlhOn = false;
+    public bool RestoreHeatlhOn = false;
     [SerializeField]
     int RHAmount;
     [SerializeField]
@@ -189,11 +178,5 @@ public class PlayerCreature : LivingCreature
         anim.SetTrigger("Death");
         Debug.LogError("YOU DIED");
         StartCoroutine(GameManager.instance.GameOver());
-    }
-
-    void RestartGame()
-    {
-        GameManager.instance.RestartGame();
-        Destroy(gameObject);
     }
 }

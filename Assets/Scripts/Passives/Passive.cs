@@ -3,68 +3,57 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 
-[Serializable]
 public class Passive : MonoBehaviour
 {
-    public string Name;
+    public PassiveStats passive = new PassiveStats();
+
     [HideInInspector]
-    public int id;
-    public int cost;
+    public Player playerController;
+    [HideInInspector]
+    public PlayerCreature playerCreature;
+    [HideInInspector]
+    public PassiveTreeController passiveController;
 
-    /* State in tree:
-    Enabled = can be picked
-    Active = has been picked
-    Disabled = can't be picked */
-    public enum State { Enabled, Active, Disabled };
-    public State state;
-
-    /* Activate() method for this passive */
-    public enum Passives { test, test2 };
-    public Passives passive;
-    public Passive[] requiredPassive;
-    public Sprite sprite;
-
-    public delegate void Activates();
-    public Activates[] activationMethods;
-
-    Player playerController;
-    public GameObject skeleton;
-
-    Button button;
-    Text text;
-    Image img;
+    [HideInInspector]
+    public Button button;
+    [HideInInspector]
+    public Text text;
+    [HideInInspector]
+    public Image img;
+    [HideInInspector]
     public GameObject lineRenderer;
-    LineRenderer[] line;
-    List<Vector3[]> linePositions = new List<Vector3[]>();
+    [HideInInspector]
+    public LineRenderer[] line;
+    [HideInInspector]
+    public List<Vector3[]> linePositions = new List<Vector3[]>();
 
-    void Activate()
+    void Start()
     {
-        if (state != State.Enabled)
-            return;
+        passive.activationMethods = new PassiveStats.Activates[] { Dash, Test };
+        GameManager.passives.Add(this);
 
-        if (CurrencyController.CC.CheckCurrency() < cost)
+        #region Required Passives
+
+        passive.monobehaviourPassive = this;
+
+        if (passive.requiredPassivesPassiveObject.Length > 0)
         {
-            Debug.Log("Not enough $$$ for [" + Name + "]");
-            return;
+            for (int r = 0; r < passive.requiredPassivesPassiveObject.Length; r++)
+            {
+                PassiveStats.RequiredPassives requiredPassive = passive.requiredPassives[r];
+                passive.requiredPassivesPassiveObject[r] = passiveController.passiveBranches[requiredPassive.branchID].passives[requiredPassive.passiveID].monobehaviourPassive;
+            }
         }
 
-        CurrencyController.CC.RemoveCurrency(cost);
-
-        state = State.Active;
-        activationMethods[(int)passive].Invoke();
-    }
-
-    void Awake()
-    {
-        activationMethods = new Activates[] { Dash, SpookTest } ;
+        #endregion
 
         #region Lines
 
-        line = new LineRenderer[requiredPassive.Length];
+        line = new LineRenderer[passive.requiredPassives.Length];
 
-        if (requiredPassive.Length > 0 && lineRenderer != null)
-        {            
-            for (int i = 0; i < requiredPassive.Length; i++)
+        if (passive.requiredPassives.Length > 0 && lineRenderer != null)
+        {
+            for (int i = 0; i < passive.requiredPassives.Length; i++)
             {
                 line[i] = Instantiate(lineRenderer, transform).GetComponent<LineRenderer>();
                 line[i].numPositions = 2;
@@ -73,47 +62,52 @@ public class Passive : MonoBehaviour
         }
 
         #endregion
-        
+
+        #region GETs
+
         button = GetComponentInChildren<Button>();
         text = GetComponentInChildren<Text>();
         img = button.GetComponent<Image>();
-        img.sprite = sprite;
-        button.onClick.AddListener(Activate);
+        img.sprite = passive.sprite;
+        button.onClick.AddListener(passive.Activate);
 
         if (button == null)
             Debug.LogError("No button element in children.");
         if (text == null)
             Debug.LogError("No text element in children.");
-        if(img == null)
-            Debug.LogError("No image element in button.");        
-    }
+        if (img == null)
+            Debug.LogError("No image element in button.");
 
-    void Start()
-    {
+        #endregion
+
         playerController = GameManager.player.GetComponent<Player>();
+        playerCreature = GameManager.player.GetComponent<PlayerCreature>();
     }
 
     void Update()
     {
+        if (playerController == null)
+            playerController = GameManager.player.GetComponent<Player>();
+
         #region Lines && Required passives
 
-        if (requiredPassive.Length > 0)
+        if (passive.requiredPassivesPassiveObject.Length > 0)
         {
-            for (int i = 0; i < requiredPassive.Length; i++)
+            for (int i = 0; i < passive.requiredPassivesPassiveObject.Length; i++)
             {
-                if(line.Length > 0 && linePositions.Count > 0 && lineRenderer != null)
+                if (line.Length > 0 && linePositions.Count > 0 && lineRenderer != null)
                 {
-                    Vector3 rPassivePos = Camera.main.ScreenToWorldPoint(requiredPassive[i].transform.position);
+                    Vector3 rPassivePos = Camera.main.ScreenToWorldPoint(passive.requiredPassivesPassiveObject[i].transform.position);
                     linePositions[i][1] = new Vector3(rPassivePos.x, rPassivePos.y, -10);
                 }
 
-                if (requiredPassive[i].state != State.Active)
+                if (passive.requiredPassivesPassiveObject[i].passive.state != PassiveStats.State.Active)
                 {
-                    state = State.Disabled;
+                    passive.state = PassiveStats.State.Disabled;
                 }
-                else if(requiredPassive[i].state == State.Active && state != State.Active)
+                else if (passive.requiredPassivesPassiveObject[i].passive.state == PassiveStats.State.Active && passive.state != PassiveStats.State.Active)
                 {
-                    state = State.Enabled;
+                    passive.state = PassiveStats.State.Enabled;
                 }
             }
         }
@@ -132,22 +126,22 @@ public class Passive : MonoBehaviour
 
         if (button != null)
         {
-            switch (state)
+            switch (passive.state)
             {
-                case State.Active:
+                case PassiveStats.State.Active:
                     {
                         button.transition = Selectable.Transition.None;
                         button.GetComponent<Image>().color = button.colors.highlightedColor;
                         break;
                     }
-                case State.Enabled:
+                case PassiveStats.State.Enabled:
                     {
                         button.interactable = true;
                         button.transition = Selectable.Transition.ColorTint;
                         button.GetComponent<Image>().color = button.colors.normalColor;
                         break;
                     }
-                case State.Disabled:
+                case PassiveStats.State.Disabled:
                     {
                         button.interactable = false;
                         button.GetComponent<Image>().color = button.colors.disabledColor;
@@ -155,33 +149,93 @@ public class Passive : MonoBehaviour
                     }
             }
         }
+        else
+        {
+            button = GetComponentInChildren<Button>();
+        }
 
         if (text != null)
         {
-            text.text = state == State.Active ? Name : Name + "\nCost: " + cost;
+            text.text = passive.state == PassiveStats.State.Active ? passive.Name : passive.Name + "\nCost: " + passive.cost;
+        }
+        else
+        {
+            text = GetComponentInChildren<Text>();
         }
     }
+
+    #region Passive Actiavtes()
 
     void Dash()
     {
-        playerController.canDash = true;
+        Debug.Log("Dash");
     }
 
-    void SpookTest()
+    void Test()
     {
-        Debug.Log("Boo");
+        Debug.Log("Test");
+    }
 
-        int skeletons = 20;
+    #endregion
+}
 
-        for (int i = 0; i < skeletons; i++)
+[Serializable]
+public class PassiveStats
+{
+    public string Name;
+    [HideInInspector]
+    public int branchID;
+    [HideInInspector]
+    public int ID;
+    public int cost;
+
+    /* State in tree:
+    Enabled = can be picked
+    Active = has been picked
+    Disabled = can't be picked */
+    public enum State { Enabled, Active, Disabled };
+    public State state;
+
+    /* Activate() method for this passive */
+    public enum Passives { Dash, Test };
+    public Passives passive;
+    
+    [Serializable]
+    public class RequiredPassives
+    {
+        public int branchID;
+        public int passiveID;
+    }
+    
+    public RequiredPassives[] requiredPassives;
+    public Passive[] requiredPassivesPassiveObject;
+    [HideInInspector]
+    public Passive monobehaviourPassive;
+    public Sprite sprite;
+
+    public delegate void Activates();
+    public Activates[] activationMethods;    
+
+    public void Activate()
+    {
+        if (state != State.Enabled)
+            return;
+
+        if (CurrencyController.CC.CheckCurrency() < cost)
         {
-            GameObject clone = Instantiate(skeleton, playerController.transform.position, Quaternion.identity);
-            LivingCreature.Statistics stats = clone.GetComponent<SummonCreature>().stats;
-            stats.damage = 10;
-            stats.knockbackPower = 10;
-            stats.maxHealth = 50;
-            stats.Initialize();
+            Debug.Log("Not enough $ for [" + Name + "]");
+            return;
         }
+
+        CurrencyController.CC.RemoveCurrency(cost);
+
+        state = State.Active;
+        activationMethods[(int)passive].Invoke();
+    }
+
+    public void Reset()
+    {
+        state = State.Enabled;
     }
 }
 

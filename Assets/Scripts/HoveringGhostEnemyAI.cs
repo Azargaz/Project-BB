@@ -80,7 +80,7 @@ public class HoveringGhostEnemyAI : EnemyAI
     {
         Vector2 direction;
 
-        float R = followRange - 1;
+        float R = attackRange + 3;
 
         float angle = circleTimer * 2f;
 

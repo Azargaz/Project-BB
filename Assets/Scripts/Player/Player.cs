@@ -33,7 +33,7 @@ public class Player : MonoBehaviour
     Transform trail;
     Animator anim;
     public int facing = 1;
-    public bool canDash;
+    public bool canDash = true;
     public bool freeze;
     public bool mouseChangingDirections = false;
     Vector2 mousePos;

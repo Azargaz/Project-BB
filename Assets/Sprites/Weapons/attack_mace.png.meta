@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 2fc684d26a1ad4948820e32b8d13e6ef
-timeCreated: 1484328817
+timeCreated: 1484602037
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -135,32 +135,6 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 192
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: attack_mace_4
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 0
-        width: 64
-        height: 64
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: attack_mace_5
-      rect:
-        serializedVersion: 2
-        x: 320
         y: 0
         width: 64
         height: 64

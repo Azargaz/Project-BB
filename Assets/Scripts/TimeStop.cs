@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TimeStop : MonoBehaviour
 {
     public bool stopTime = false;
-    public float staminaDrainPerSec;
+    float staminaDrainPerSec;
     bool timeStopped = false;
     GameObject timeStopHUD;
     float timeStoppedTimeLeft;
@@ -23,7 +23,7 @@ public class TimeStop : MonoBehaviour
 	void Update ()
     {
         if (GameManager.instance.pause)
-            return;
+            return;        
 
         if (timeStopHUD == null)
             timeStopHUD = GameObject.FindGameObjectWithTag("TimeStop");
@@ -40,6 +40,8 @@ public class TimeStop : MonoBehaviour
 
         if (stopTime && player.stats.curStamina > 0)
         {
+            staminaDrainPerSec = WeaponController.wc.eqWeaponCurAttack.staminaCost;
+
             stopTime = false;
             timeStopped = !timeStopped;
 
@@ -64,6 +66,7 @@ public class TimeStop : MonoBehaviour
         {
             if (timeStopped)
             {
+                stopTime = false;
                 timeStopped = false;
                 timeStoppedTimeLeft = 0;
                 player.stats.invincibilityTime = 0;

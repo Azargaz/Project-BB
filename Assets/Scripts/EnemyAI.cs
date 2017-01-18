@@ -12,7 +12,6 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Base AI")]
     public float range = 10f;    
-    public float followRange = 1f;
     public float minDistanceFromTarget = 0.5f;
 
     public bool canJump = true;
@@ -151,23 +150,21 @@ public class EnemyAI : MonoBehaviour
                 return EnemyState.attack;
             }
             else
-            {             
-                if (Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget)
-                {
-                    targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
+            {
+                if (distToTarget <= minDistanceFromTarget)
+                    return EnemyState.stop;
+                  
+                targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
 
-                    controller.jumpDown = targetDirection.y == -1;
+                controller.jumpDown = targetDirection.y == -1;
 
-                    return EnemyState.walk;
-                }
-
-                return EnemyState.stop;
+                return EnemyState.walk;
             }
         }
         // Else walk towards player
         else
         {
-            if(distToTarget > followRange && Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget)
+            if(distToTarget > minDistanceFromTarget)
             {
                 targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
 

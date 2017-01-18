@@ -13,7 +13,7 @@ public class SpawnGameManager : MonoBehaviour
 
         if (gm == null)
         {            
-            gm = Instantiate(gameManager);
+            gm = Instantiate(gameManager);            
         }
     }
 }

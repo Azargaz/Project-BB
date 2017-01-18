@@ -7,6 +7,9 @@ public class PlayerWeaponController : MonoBehaviour
     int currentAttackNumber = 0;
     int combo = 0;
     bool attacked = true;
+    bool chargeBroken = true;
+    [HideInInspector]
+    public static bool fullyCharged = false;
     bool playerAttackAnimation = false;
     Animator playerAnim;
     WeaponController.Weapon eqWeapon;
@@ -30,24 +33,32 @@ public class PlayerWeaponController : MonoBehaviour
         eqWeapon = WeaponController.wc.equippedWeapon;
         playerAttackAnimation = playerAnim.GetCurrentAnimatorStateInfo(0).IsName("attack_player");        
 
-        if(attacked)
+        if(!playerAttackAnimation)
         {
-            if (Input.GetButtonDown("Fire1"))
+            WeaponController.wc.eqWeaponCurAttack.chargeTimer = 0;
+
+            if (Input.GetButton("Fire1") && eqWeapon.attacks[0].staminaCost < stats.curStamina)
             {
                 attackNumber = 1;                
             }
 
-            if (Input.GetButtonDown("Fire2"))
+            if(eqWeapon.attacks.Length > 1)
             {
-                attackNumber = 2;
+                if (Input.GetButton("Fire2") && eqWeapon.attacks[1].staminaCost < stats.curStamina)
+                {
+                    attackNumber = 2;
+                }
             }
         }
 
-        if (eqWeapon.attacks.Length >= attackNumber && attackNumber != 0)
+        if (attackNumber != 0)
         {
-            if(eqWeapon.attacks[attackNumber - 1].staminaCost > stats.curStamina)
+            if (eqWeapon.attacks.Length < attackNumber)
+                attackNumber = 1;
+
+            if (eqWeapon.attacks[attackNumber - 1].staminaCost > stats.curStamina)
                 attackNumber = 0;
-        }            
+        }     
 
         if (!playerAttackAnimation && attackNumber != 0 && WeaponController.wc.eqWeaponCurAttack.staminaCost <= stats.curStamina)
         {
@@ -59,32 +70,35 @@ public class PlayerWeaponController : MonoBehaviour
             attackNumber = 0;
         }
 
-        if (!playerAttackAnimation && stats.animationBusy)
+        if (!playerAttackAnimation && stats.animationBusy)            
+        {
+            playerAnim.SetBool("BreakCharge", true);
             stats.animationBusy = false;
-
-        if (stats.stunned)
-            attacked = true;
+        }
 
         #region Chargable attacks
 
-        if (playerAttackAnimation && stats.stunned)
-            BreakCharge();
+        if (playerAttackAnimation && !attacked && stats.stunned)
+            BreakCharge();        
 
-        
-
-        if (playerAttackAnimation && eqWeapon.attacks[currentAttackNumber].chargable && !attacked)
+        if (playerAttackAnimation && eqWeapon.attacks[currentAttackNumber].chargable && !attacked && curAttack.chargeTimer < curAttack.chargeTime)
         {
+            curAttack.chargeTimer += Time.deltaTime;
+
+            if (curAttack.chargedStaminaCost > stats.curStamina)
+                BreakCharge();
+
             switch(currentAttackNumber)
             {
                 case 0:
                     {
-                        if(Input.GetButtonUp("Fire1"))
+                        if(!Input.GetButton("Fire1"))
                             BreakCharge();
                         break;
                     }
                 case 1:
                     {
-                        if (Input.GetButtonUp("Fire2"))
+                        if (!Input.GetButton("Fire2"))
                             BreakCharge();
                         break;
                     }
@@ -96,6 +110,11 @@ public class PlayerWeaponController : MonoBehaviour
 
     void BreakCharge()
     {
+        if (chargeBroken)
+            return;
+
+        chargeBroken = true;
+
         StopCoroutine(AnimationCharge());
 
         if (curAttack.chargeAnim.Length > 0)
@@ -104,9 +123,13 @@ public class PlayerWeaponController : MonoBehaviour
             chargeAnim.SetBool("BreakCharge", true);
         }
 
-        playerAnim.SetFloat("AttackSpeed", 1);
-        playerAnim.SetBool("BreakCharge", true);
+        playerAnim.SetFloat("AttackSpeed", curAttack.attackSpeed);
         stats.animationBusy = false;
+
+        if (curAttack.needFullCharge && !fullyCharged)
+        {            
+            playerAnim.SetBool("BreakCharge", true);            
+        }   
     }
 
     void StartAttack(int _attackNumber)
@@ -114,8 +137,8 @@ public class PlayerWeaponController : MonoBehaviour
         currentAttackNumber = _attackNumber - 1;
         WeaponController.wc.currentAttack = currentAttackNumber;
         WeaponController.Weapon.Attack atk = eqWeapon.attacks[currentAttackNumber];
-        curAttack = atk;
-        attacked = false;
+        curAttack = atk;        
+        fullyCharged = false;
         WeaponController.wc.RollCritical(currentAttackNumber);
 
         if (curAttack.numberOfHits <= 1)
@@ -124,7 +147,7 @@ public class PlayerWeaponController : MonoBehaviour
         if (combo == curAttack.numberOfHits)
             combo = 0;
 
-        playerAnim.SetFloat("AttackId", (float)atk.type[combo] / 10f);
+        playerAnim.SetFloat("AttackId", (float)atk.animationTypes[combo] / 10f);
         playerAnim.SetFloat("AttackSpeed", curAttack.attackSpeed);
         playerAnim.SetBool("BreakCharge", false);
         playerAnim.SetTrigger("Attack");
@@ -134,7 +157,10 @@ public class PlayerWeaponController : MonoBehaviour
 
     IEnumerator AnimationCharge()
     {
-        if(curAttack.chargable)
+        attacked = false;
+        chargeBroken = false;
+
+        if (curAttack.chargable)
         {
             if(curAttack.chargeAnim.Length > 0)
             {
@@ -146,9 +172,14 @@ public class PlayerWeaponController : MonoBehaviour
 
             playerAnim.SetFloat("AttackSpeed", 0);
             stats.animationBusy = true;
+            curAttack.chargeTimer = 0;
         }
 
-        yield return new WaitForSeconds(eqWeapon.attacks[currentAttackNumber].chargeTime);
+        while (curAttack.chargeTimer < curAttack.chargeTime && curAttack.chargeTime != 0)
+            yield return null;
+
+        if(curAttack.chargable)
+            fullyCharged = true;
 
         playerAnim.SetFloat("AttackSpeed", curAttack.attackSpeed);
         stats.animationBusy = false;
@@ -157,7 +188,9 @@ public class PlayerWeaponController : MonoBehaviour
     void AnimationAttack()
     {
         DrainStamina();
+        SetPlayerStats();
         attacked = true;
+        WeaponController.wc.eqWeaponCurAttack.chargeTimer = 0;
 
         Animator attackAnim = curAttack.aoeAnim[combo];
         attackAnim.SetTrigger("Start");
@@ -193,8 +226,52 @@ public class PlayerWeaponController : MonoBehaviour
 
     void DrainStamina()
     {
-        stats.curStamina -= eqWeapon.attacks[currentAttackNumber].staminaCost;
+        if(fullyCharged)
+            stats.curStamina -= eqWeapon.attacks[currentAttackNumber].chargedStaminaCost;
+        else
+            stats.curStamina -= eqWeapon.attacks[currentAttackNumber].staminaCost;
+
         stats.DelayStaminaRegen();
+    }
+
+    void SetPlayerStats()
+    {
+        stats.damage = curAttack.baseDamage;
+        stats.knockbackPower = curAttack.knockbackPower;
+
+        if (curAttack.crit)
+            stats.damage = curAttack.criticalDamage;
+
+        float chargePercent = curAttack.chargeTimer / curAttack.chargeTime;        
+
+        if(curAttack.chargable && curAttack.scaleDamageWithChargeTime)
+        {
+            if (chargePercent > 0)
+            {
+                float chargeDmgMultiplier = 1f;
+
+                if (chargePercent >= 0.25f && chargePercent < 0.5f)
+                    chargeDmgMultiplier = 1.5f;
+                else if (chargePercent >= 0.5f && chargePercent < 0.75f)
+                    chargeDmgMultiplier = 2f;
+                else if (chargePercent >= 0.7f)
+                    chargeDmgMultiplier = 3f;
+
+                if (curAttack.crit)
+                    stats.damage = (int)(curAttack.criticalDamage * chargeDmgMultiplier);
+                else
+                    stats.damage = (int)(curAttack.baseDamage * chargeDmgMultiplier);
+            }
+
+            if (fullyCharged)
+            {
+                stats.damage = curAttack.chargedDamage;
+                stats.knockbackPower = curAttack.chargedKnockbackPower;
+            }
+
+            if (fullyCharged && curAttack.crit)
+                stats.damage = (int)(curAttack.chargedDamage * curAttack.criticalMultiplier);
+        }        
     }
 
     #endregion

@@ -7,7 +7,8 @@ public class CurrencyController : MonoBehaviour
     [SerializeField]
     int currentCurrency;
     int initialRerollCost;
-    public int rerollCost;
+    [SerializeField]
+    int rerollCost;
 
     public static CurrencyController CC;
 
@@ -46,12 +47,17 @@ public class CurrencyController : MonoBehaviour
             return false;
 
         currentCurrency -= rerollCost;
-        rerollCost *= 2;
+        rerollCost += initialRerollCost;
         return true;
     }
 
     public void ResetRerollCost()
     {
         rerollCost = initialRerollCost;
+    }
+
+    public int GetRerollCost()
+    {
+        return rerollCost;
     }
 }

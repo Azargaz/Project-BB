@@ -1,14 +1,15 @@
 fileFormatVersion: 2
-guid: abc8ccebab00606479d2301df905e872
-timeCreated: 1484657959
+guid: 2a2216116eb41874cb8653c6a676e192
+timeCreated: 1484602054
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: attack_crimsonWand_0
-    21300002: attack_crimsonWand_1
-    21300004: attack_crimsonWand_2
-    21300006: attack_crimsonWand_3
-    21300008: attack_crimsonWand_4
+    21300000: attack_huntersScythe_0
+    21300002: attack_huntersScythe_1
+    21300004: attack_huntersScythe_2
+    21300006: attack_huntersScythe_3
+    21300008: attack_huntersScythe_4
+    21300010: attack_huntersScythe_5
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -91,7 +92,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: attack_crimsonWand_0
+      name: attack_huntersScythe_0
       rect:
         serializedVersion: 2
         x: 0
@@ -104,7 +105,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_crimsonWand_1
+      name: attack_huntersScythe_1
       rect:
         serializedVersion: 2
         x: 64
@@ -117,7 +118,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_crimsonWand_2
+      name: attack_huntersScythe_2
       rect:
         serializedVersion: 2
         x: 128
@@ -130,7 +131,7 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_crimsonWand_3
+      name: attack_huntersScythe_3
       rect:
         serializedVersion: 2
         x: 192
@@ -143,10 +144,23 @@ TextureImporter:
       outline: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: attack_crimsonWand_4
+      name: attack_huntersScythe_4
       rect:
         serializedVersion: 2
         x: 256
+        y: 0
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: attack_huntersScythe_5
+      rect:
+        serializedVersion: 2
+        x: 320
         y: 0
         width: 64
         height: 64

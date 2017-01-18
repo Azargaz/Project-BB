@@ -37,12 +37,31 @@ public abstract class LivingCreature : MonoBehaviour
         public float regenStaminaTime = 0;
         public float invincibilityTime = 0;
 
+        int startingHealth;
+        float startingStamina;
+
         public void Initialize()
         {
+            startingHealth = maxHealth;
+            startingStamina = maxStamina;
             curHealth = maxHealth;
             curStamina = maxStamina;
             stunned = false;
             alive = true;
+        }
+
+        public void Reset()
+        {
+            alive = true;
+            stunned = false;
+            animationBusy = false;
+            invincible = false;
+            immovable = false;
+            maxHealth = startingHealth;
+            maxStamina = startingStamina;
+            curHealth = maxHealth;
+            curStamina = maxStamina;
+            invincibilityTime = 0;
         }
 
         public void RegenHealth()

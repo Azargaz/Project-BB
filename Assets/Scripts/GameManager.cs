@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static int startingWeapon = 0;
     public static GameManager instance;
     public GameObject playerPrefab;
     public static GameObject player;
@@ -16,6 +15,7 @@ public class GameManager : MonoBehaviour
     bool passiveMenuOpen;
     GameObject pauseMenu;
     GameObject passiveMenu;
+    public static List<Passive> passives = new List<Passive>();
 
     #region Currency
 
@@ -28,11 +28,8 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {       
-        if (instance != null)
-            Destroy(gameObject);
-
         instance = this;
-        DontDestroyOnLoad(this);
+        DontDestroyOnLoad(gameObject);
 
         if (player == null && SceneManager.GetActiveScene().buildIndex == 1)
         {
@@ -51,8 +48,8 @@ public class GameManager : MonoBehaviour
             }            
         }
         else if (SceneManager.GetActiveScene().buildIndex == 1)
-        {
-            if(pauseMenu == null)
+        {           
+            if (pauseMenu == null)
             {
                 pauseMenu = GameObject.FindGameObjectWithTag("Pause");
                 pauseMenu.SetActive(false);
@@ -79,6 +76,9 @@ public class GameManager : MonoBehaviour
                     PauseUnPause(passiveMenu);
                 }            
             }
+
+            if (Input.GetButtonDown("Submit"))
+                RestartGame();
 
             #region Currency
 
@@ -139,43 +139,47 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void LoadWeaponSelect()
+    void ResetPassives()
     {
-        SceneManager.LoadScene(3);
-        if (player != null)
-            Destroy(player);
-        Destroy(gameObject);
+        for (int i = 0; i < passives.Count; i++)
+        {
+            passives[i].passive.Reset();
+        }
     }
 
     public IEnumerator GameOver()
     {
         GameObject.FindGameObjectWithTag("YouDied").GetComponent<Animator>().SetTrigger("Play");
         yield return new WaitForSeconds(3f);
-        Destroy(player);
-        LoadScene(1);
+        RestartGame();
     }
 
     public void RestartGame()
     {
         CurrencyController.CC.ResetCurrency();
+        Destroy(player);
+        ResetPassives();
         LoadScene(1);
     }
 
     public void LoadScene(int i)
     {
-        SceneManager.LoadScene(i);
-
-        if (pause)
-            PauseUnPause(null);
-
         if (pauseMenu != null)
-            pauseMenu.SetActive(false);
+        {
+            if (pause && !passiveMenuOpen)
+                PauseUnPause(pauseMenu);
+        }
 
         if (passiveMenu != null)
-            passiveMenu.SetActive(false);
+        {            
+            if (pause && passiveMenuOpen)
+                PauseUnPause(passiveMenu);
 
-        if (i != 1)
-            Destroy(gameObject);        
+            passiveMenuOpen = false;
+        }
+
+        CurrencyController.CC.ResetRerollCost();
+        SceneManager.LoadScene(i);
     }
 
     void OnLevelWasLoaded()
@@ -184,9 +188,7 @@ public class GameManager : MonoBehaviour
         {
             if (player == null)
             {
-                player = Instantiate(playerPrefab);
-                WeaponController.wc.currentWeapon = startingWeapon;
-                CurrencyController.CC.ResetRerollCost();
+                player = Instantiate(playerPrefab);            
                 player.transform.position = new Vector3(0, 6, 0);
             }
 
@@ -197,10 +199,5 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
-    }
-
-    public void ChangeStartingWeapon(Dropdown i)
-    {
-        startingWeapon = i.value;
     }
 }

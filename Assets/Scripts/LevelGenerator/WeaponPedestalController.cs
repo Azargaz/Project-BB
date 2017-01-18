@@ -174,6 +174,7 @@ public class WeaponPedestalController : MonoBehaviour
     void OnLevelWasLoaded()
     {
         initializeWeaponPedestals = false;
+        switchUsedWeapons = false;
         minibossSpawned = false;
         lastWeaponPedestal = null;
         weaponPedestals.Clear();
