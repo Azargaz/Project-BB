@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public GameObject playerPrefab;
+    public GameObject staticHUDPrefab;
     public static GameObject player;
     public List<GameObject> monsters = new List<GameObject>();
     public List<GameObject> flyingProjectiles;
@@ -36,6 +37,11 @@ public class GameManager : MonoBehaviour
             player = Instantiate(playerPrefab);
             player.transform.position = new Vector3(0, 6, 0);
         }
+
+        if(passiveMenu == null && SceneManager.GetActiveScene().buildIndex == 1)
+        {
+            passiveMenu = Instantiate(staticHUDPrefab.transform.GetChild(0).gameObject);
+        }
     }
 
     void Update()
@@ -58,6 +64,10 @@ public class GameManager : MonoBehaviour
             if(passiveMenu == null)
             {
                 passiveMenu = GameObject.FindGameObjectWithTag("Passives");
+
+                if(passiveMenu == null)
+                    passiveMenu = Instantiate(staticHUDPrefab, transform).transform.GetChild(0).gameObject;
+
                 passiveMenu.SetActive(false);
             }
 

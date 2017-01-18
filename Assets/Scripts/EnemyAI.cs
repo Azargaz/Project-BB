@@ -16,6 +16,7 @@ public class EnemyAI : MonoBehaviour
 
     public bool canJump = true;
     public bool canDropDown = true;
+    public bool hovering = false;
     [SerializeField]
     protected bool canAttack = true;
     protected bool jump = false;
@@ -135,7 +136,7 @@ public class EnemyAI : MonoBehaviour
             return EnemyState.idle;
         }
 
-        if((controller.collisions.right && targetPosDifference.x > 0) || (controller.collisions.left && targetPosDifference.x < 0))
+        if((controller.collisions.right && targetPosDifference.x > 0) || (controller.collisions.left && targetPosDifference.x < 0) || (controller.fallDirection == 1 && targetPosDifference.x > 0) || (controller.fallDirection == -1 && targetPosDifference.x < 0))
         {
             return EnemyState.stop;
         }
@@ -149,24 +150,29 @@ public class EnemyAI : MonoBehaviour
                 attacked = true;
                 return EnemyState.attack;
             }
-            else
+            else if (hovering || Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget)
             {
-                if (distToTarget <= minDistanceFromTarget)
-                    return EnemyState.stop;
-                  
                 targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
+
+                if (hovering)
+                    targetDirection = HoveringTargetDirection(targetPosDifference);
 
                 controller.jumpDown = targetDirection.y == -1;
 
                 return EnemyState.walk;
             }
+            else
+                return EnemyState.stop;
         }
         // Else walk towards player
         else
         {
-            if(distToTarget > minDistanceFromTarget)
+            if(distToTarget > minDistanceFromTarget && (hovering || Mathf.Abs(targetPosDifference.x) > minDistanceFromTarget))
             {
                 targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, Mathf.Abs(targetPosDifference.y) < 1f ? 0 : targetPosDifference.y > 0 ? (canJump ? 1 : 0) : (canDropDown ? -1 : 0));
+
+                if (hovering)
+                    targetDirection = HoveringTargetDirection(targetPosDifference);
 
                 controller.jumpDown = targetDirection.y == -1;
 
@@ -178,6 +184,28 @@ public class EnemyAI : MonoBehaviour
                 return EnemyState.stop;
             }
         }
+    }
+
+    Vector2 HoveringTargetDirection(Vector2 targetPosDifference)
+    {
+        Vector2 targetDirection = Vector2.zero;
+
+        targetDirection.y = targetPosDifference.y > 0 ? 1 : -1;
+
+        if (Mathf.Abs(targetPosDifference.x) > Mathf.Abs(targetPosDifference.y))
+        {
+            targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, 0);
+        }
+        else if (Mathf.Abs(targetPosDifference.x) == Mathf.Abs(targetPosDifference.y))
+        {
+            targetDirection = new Vector2(targetPosDifference.x > 0 ? 1 : -1, targetPosDifference.y > 0 ? 1 : -1);
+        }
+        else
+        {
+            targetDirection = new Vector2(0, targetPosDifference.y > 0 ? 1 : -1);
+        }
+
+        return targetDirection;
     }
     
     #endregion 

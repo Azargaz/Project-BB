@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Seeker))]
 public class GroundEnemyAI : EnemyAI
 {
     [Header("Ground AI")]
@@ -25,8 +24,6 @@ public class GroundEnemyAI : EnemyAI
 
     protected override void Start ()
     {
-        pathfinding = true;
-
         base.Start();
         
         moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
@@ -77,7 +74,9 @@ public class GroundEnemyAI : EnemyAI
                 }
             case EnemyState.walk:
                 {
-                    Pathfinding();
+                    if(pathfinding)
+                        Pathfinding();
+
                     input = targetDirection;
                     break;
                 }

@@ -19,6 +19,8 @@ public class Controller2D : MonoBehaviour
     public bool player;
     [HideInInspector]
     public bool jumpDown;
+    [HideInInspector]
+    public int fallDirection = 0;
 
     void Start()
     {
@@ -73,10 +75,10 @@ public class Controller2D : MonoBehaviour
     void VerticalCollisions(ref Vector3 velocity)
     {
         float directionY = Mathf.Sign(velocity.y);
-        float rayLength = Mathf.Abs(velocity.y) + skinWidth;
+        float rayLength = Mathf.Abs(velocity.y) + skinWidth;        
 
         for (int i = 0; i < verticalRayCount; i++)
-        {
+        {            
             Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
             rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
@@ -99,6 +101,16 @@ public class Controller2D : MonoBehaviour
                 collisions.below = directionY == -1;
                 collisions.above = directionY == 1;                 
             }
+            
+            if(i == 0 || i == verticalRayCount)
+            {
+                if (hit && directionY == -1)
+                    fallDirection = 0;
+                else if (!hit && directionY == -1)
+                {
+                    fallDirection = i == 0 ? -1 : 1;
+                }
+            }            
         }
     }
 

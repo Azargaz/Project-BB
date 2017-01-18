@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
 public class PassiveTreeController : MonoBehaviour
 {
@@ -14,14 +13,18 @@ public class PassiveTreeController : MonoBehaviour
     public class PassiveBranch
     {
         public string Name;
+        public enum BranchType { Strength, Dexterity, Magic, Other };
+        public BranchType branchType;
         public PassiveStats[] passives;
     }
 
     void Awake()
     {
         for (int i = 0; i < passiveBranches.Length; i++)
-        {
-            GameObject branch = Instantiate(passiveBranchGO, transform);
+        {            
+            passiveBranches[i].Name = passiveBranches[i].branchType.ToString();
+
+            GameObject branch = Instantiate(passiveBranchGO, transform);            
 
             /* Set branch's name to Branch + ID + Branch's Name (in format "B# [Name]")*/
             branch.name = "B" + i + " [" + passiveBranches[i].Name + "]";
@@ -50,6 +53,49 @@ public class PassiveTreeController : MonoBehaviour
                 passive.name = "P" + stats.ID + " [" + passiveBranches[i].passives[j].Name + "]";                
             }
         }
+    }
+
+    int countStr;
+    int countDex;
+    int countMag;
+
+    void Update()
+    {
+        countStr = 0;
+        countDex = 0;
+        countMag = 0;
+
+        for (int i = 0; i < passiveBranches.Length; i++)
+        {
+            for (int j = 0; j < passiveBranches[i].passives.Length; j++)
+            {
+                if(passiveBranches[i].passives[j].state == PassiveStats.State.Active)
+                {
+                    switch (passiveBranches[i].branchType)
+                    {
+                        case PassiveBranch.BranchType.Strength:
+                            {
+                                countStr++;
+                                break;
+                            }
+                        case PassiveBranch.BranchType.Dexterity:
+                            {
+                                countDex++;
+                                break;
+                            }
+                        case PassiveBranch.BranchType.Magic:
+                            {
+                                countMag++;
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+
+        WeaponController.wc.UpdateDamageBonus(WeaponController.DmgBonus.Type.Strength, countStr);
+        WeaponController.wc.UpdateDamageBonus(WeaponController.DmgBonus.Type.Dexterity, countDex);
+        WeaponController.wc.UpdateDamageBonus(WeaponController.DmgBonus.Type.Magic, countMag);
     }
 }
 

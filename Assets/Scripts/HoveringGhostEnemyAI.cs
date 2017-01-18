@@ -32,7 +32,7 @@ public class HoveringGhostEnemyAI : EnemyAI
         if (freeze)
             return;
 
-        Vector2 input = targetDirection;
+        Vector2 input = Vector2.zero;
 
         switch (currentState)
         {

@@ -172,12 +172,31 @@ public class WeaponController : MonoBehaviour
     public int currentWeapon = 0;
     public int currentAttack = 0;
 
-    [Range(1f, 10f)]
-    public float strengthDamageBonus = 1;
-    [Range(1f, 10f)]
-    public float dexterityDamageBonus = 1;
-    [Range(1f, 10f)]
-    public float magicDamageBonus = 1;
+    [HideInInspector]
+    public int strengthCount;
+    [HideInInspector]
+    public int dexterityCount;
+    [HideInInspector]
+    public int magicCount;
+
+    public DmgBonus[] dmgBonuses;
+
+    [System.Serializable]
+    public class DmgBonus
+    {
+        public enum Type { Strength, Dexterity, Magic };
+        public Type type;
+        public Range[] ranges;
+        public float damageBonus = 1f;
+        public int statCount;
+
+        [System.Serializable]
+        public class Range
+        {
+            public int requiredRange;
+            public float bonusPercent;
+        }
+    }
 
     [SerializeField]
     public Weapon[] weapons;
@@ -215,7 +234,46 @@ public class WeaponController : MonoBehaviour
 
         eqWeaponCurAttack = equippedWeapon.attacks[currentAttack];
 
+        DamageBonuses();
         WeaponTypeDamageBonuses();
+    }
+
+    void DamageBonuses()
+    {
+        int count = 0;
+
+        for (int i = 0; i < dmgBonuses.Length; i++)
+        {
+            count = dmgBonuses[i].statCount;
+
+            for (int j = 0; j < dmgBonuses[i].ranges.Length; j++)
+            {
+                dmgBonuses[i].damageBonus = 1f;
+
+                if (count >= dmgBonuses[i].ranges[j].requiredRange)
+                    dmgBonuses[i].damageBonus = 1f + (dmgBonuses[i].ranges[j].bonusPercent / 100f);
+
+                if(j != dmgBonuses[i].ranges.Length - 1)
+                {
+                    if(count >= dmgBonuses[i].ranges[j].requiredRange && count < dmgBonuses[i].ranges[j + 1].requiredRange)
+                    {
+                        dmgBonuses[i].damageBonus = 1f + (dmgBonuses[i].ranges[j].bonusPercent / 100f);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    float FindDamageBonus(DmgBonus.Type type)
+    {
+        for (int i = 0; i < dmgBonuses.Length; i++)
+        {
+            if (dmgBonuses[i].type == type)
+                return dmgBonuses[i].damageBonus;
+        }
+
+        return 1f;
     }
 
     void WeaponTypeDamageBonuses()
@@ -228,37 +286,46 @@ public class WeaponController : MonoBehaviour
             {
                 case Weapon.WeaponType.Strength:
                     {
-                        multiplier = strengthDamageBonus;
+                        multiplier = FindDamageBonus(DmgBonus.Type.Strength);
                         break;
                     }
                 case Weapon.WeaponType.Dexterity:
                     {
-                        multiplier = dexterityDamageBonus;
+                        multiplier = FindDamageBonus(DmgBonus.Type.Dexterity);
                         break;
                     }
                 case Weapon.WeaponType.Magic:
                     {
-                        multiplier = magicDamageBonus;
+                        multiplier = FindDamageBonus(DmgBonus.Type.Magic);
                         break;
                     }
                 case Weapon.WeaponType.StrDex:
                     {
-                        multiplier = (strengthDamageBonus + dexterityDamageBonus) / 2f;
+                        multiplier = (FindDamageBonus(DmgBonus.Type.Strength) + FindDamageBonus(DmgBonus.Type.Dexterity)) / 2f;
                         break;
                     }
                 case Weapon.WeaponType.StrMagic:
                     {
-                        multiplier = (strengthDamageBonus + magicDamageBonus) / 2f;
+                        multiplier = (FindDamageBonus(DmgBonus.Type.Strength) + FindDamageBonus(DmgBonus.Type.Magic)) / 2f;
                         break;
                     }
                 case Weapon.WeaponType.DexMagic:
                     {
-                        multiplier = (dexterityDamageBonus + magicDamageBonus) / 2f;
+                        multiplier = (FindDamageBonus(DmgBonus.Type.Dexterity) + FindDamageBonus(DmgBonus.Type.Magic)) / 2f;
                         break;
                     }
             }
 
             weapons[i].MultiplyDamageByBonus(multiplier);
+        }
+    }
+
+    public void UpdateDamageBonus(DmgBonus.Type type, int count)
+    {
+        for (int i = 0; i < dmgBonuses.Length; i++)
+        {
+            if (dmgBonuses[i].type == type)
+                dmgBonuses[i].statCount = count;
         }
     }
 }

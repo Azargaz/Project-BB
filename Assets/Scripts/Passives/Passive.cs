@@ -208,6 +208,7 @@ public class PassiveStats
     }
     
     public RequiredPassives[] requiredPassives;
+    [HideInInspector]
     public Passive[] requiredPassivesPassiveObject;
     [HideInInspector]
     public Passive monobehaviourPassive;

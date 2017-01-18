@@ -7,9 +7,6 @@ public class PlayerCreature : LivingCreature
 {
     Animator anim;
     Player controller;
-    [HideInInspector]
-    WeaponController wc;
-    bool cheatMode = false;
 
     void Awake()
     {
@@ -17,7 +14,6 @@ public class PlayerCreature : LivingCreature
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<Player>();
-        wc = GetComponentInChildren<WeaponController>();
     }
 
     protected override void Update()
@@ -26,20 +22,6 @@ public class PlayerCreature : LivingCreature
             return;
 
         base.Update();
-
-        #region Invincibility cheat
-
-        if (Input.GetKeyDown(KeyCode.O) && Input.GetKeyDown(KeyCode.P))
-        {            
-            if (!cheatMode)
-                stats.Invincibility(1000000);
-            else
-                stats.invincibilityTime = 0;
-
-            cheatMode = !cheatMode;                       
-        }
-
-        #endregion
 
         #region Restore health
 
