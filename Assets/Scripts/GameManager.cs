@@ -40,7 +40,8 @@ public class GameManager : MonoBehaviour
 
         if(passiveMenu == null && SceneManager.GetActiveScene().buildIndex == 1)
         {
-            passiveMenu = Instantiate(staticHUDPrefab.transform.GetChild(0).gameObject);
+            passiveMenu = Instantiate(staticHUDPrefab, transform).transform.GetChild(0).gameObject;
+            passiveMenu.SetActive(false);
         }
     }
 

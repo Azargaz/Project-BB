@@ -57,10 +57,10 @@ public class DamageLivingCreature : MonoBehaviour
         bool hit = _target.Damage(damage, creature, creature == null ? 0 : creature.stats.knockbackPower);
 
         if (hit)
-            AfterHit();
+            AfterHit(other.gameObject);
     }
 
-    protected virtual void AfterHit()
+    protected virtual void AfterHit(GameObject targetHit)
     {
         if (creature is PlayerCreature)
         {

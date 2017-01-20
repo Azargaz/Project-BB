@@ -12,6 +12,7 @@ public class Minimap : MonoBehaviour
     HashSet<Vector2> emptyFields = new HashSet<Vector2>();
     HashSet<Vector2> platformFields = new HashSet<Vector2>();
     HashSet<Vector2> pedestalFields = new HashSet<Vector2>();
+    HashSet<Vector2> spikeFields = new HashSet<Vector2>();
     Vector2 savedTilePos;
     Color savedTileColor;
     public Color emptyTiles;
@@ -19,8 +20,9 @@ public class Minimap : MonoBehaviour
     public Color tiles;
     public Color pedestals;
     public Color player;
+    public Color spikes;
 
-	void Start ()
+    void Start ()
     {
         Texture2D _texture = new Texture2D(32, 32);
         _texture.filterMode = FilterMode.Point;
@@ -53,6 +55,12 @@ public class Minimap : MonoBehaviour
         {
             pedestalFields.Clear();
             pedestalFields.UnionWith(GenerateRooms.GR.allPedestals);
+        }
+
+        if(spikeFields.Count <= 0)
+        {
+            spikeFields.Clear();
+            spikeFields.UnionWith(GenerateRooms.GR.allSpikeFields);
         }
 
         if (emptyFields.Count <= 0 || platformFields.Count <= 0 || pedestalFields.Count <= 0)
@@ -91,8 +99,12 @@ public class Minimap : MonoBehaviour
                     if (pedestalFields.Contains(tilePos))
                         color = pedestals;
 
+                    if (spikeFields.Contains(new Vector2(tilePos.x, tilePos.y)))
+                        color = spikes;
+
+
                     if (tilePos == roundedPlayerPos)
-                        color = player;
+                        color = player;                   
 
                     texture.SetPixel(x, y, color);
                 }

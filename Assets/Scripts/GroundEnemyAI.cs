@@ -26,7 +26,7 @@ public class GroundEnemyAI : EnemyAI
     {
         base.Start();
         
-        moveSpeed = Random.Range(movementSpeed - 0.5f, movementSpeed + 0.5f);
+        moveSpeed = Random.Range(movementSpeed - 0.1f, movementSpeed + 0.1f);
 
         RecalculateJumpVelocity();
     }

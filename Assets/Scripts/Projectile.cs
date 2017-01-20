@@ -15,6 +15,7 @@ public class Projectile : DamageLivingCreature
     Vector2 storedVelocity;
     Controller2D controller;
     float freezeSmoothTime = 0.05f;
+    public bool pierce = false;
     public bool freeze;
     public bool pause;
 
@@ -58,10 +59,13 @@ public class Projectile : DamageLivingCreature
         controller.Move(velocity * Time.deltaTime);
     }
 
-    protected override void AfterHit()
+    protected override void AfterHit(GameObject targetHit)
     {
-        base.AfterHit();
+        base.AfterHit(targetHit);
 
-        Destroy(gameObject);
+        if(targetHit.layer == 9 || (!pierce && (targetHit.layer == 10 || targetHit.layer == 13)))
+        {
+            Destroy(gameObject);
+        }
     }
 }

@@ -12,7 +12,7 @@ public class ExitController : MonoBehaviour
     {
         if (player != null)
         {
-            if (Input.GetButtonDown("PickupWeapon"))
+            if (Input.GetButtonDown("Interact"))
             {
                 GoToTheNextLevel();
             }

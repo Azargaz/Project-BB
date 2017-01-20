@@ -6,6 +6,7 @@ using UnityEngine.EventSystems;
 public class DisplayOnHover : EventTrigger
 {
     public GameObject displayOnHover;
+    bool awaken = false;
 
     public void Start()
     {
@@ -13,6 +14,16 @@ public class DisplayOnHover : EventTrigger
         {
             if (displayOnHover.activeInHierarchy)
                 displayOnHover.SetActive(false);
+
+            awaken = true;
+        }
+    }
+
+    void OnEnable()
+    {
+        if (displayOnHover != null && awaken)
+        {
+            displayOnHover.SetActive(false);
         }
     }
 

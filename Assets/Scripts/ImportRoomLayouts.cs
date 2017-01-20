@@ -37,6 +37,7 @@ public class ImportRoomLayouts : MonoBehaviour
     public GameObject spikes;
     public GameObject weaponPedestal;
     public GameObject exit;
+    public GameObject spawnPoint;
 
     public void ImportRooms()
     {
@@ -50,7 +51,7 @@ public class ImportRoomLayouts : MonoBehaviour
             {
                 _layout = new string[16];
 
-                    Load("assets/editor/_roomlayouts/type" + i + "/" + j + ".txt", j, i);
+                Load("assets/editor/_roomlayouts/type" + i + "/" + j + ".txt", j, i);
             }
 
             //Debug.Log("Room " + i + " variations count: " + roomTypes[i].layout.Count);                
@@ -75,9 +76,27 @@ public class ImportRoomLayouts : MonoBehaviour
 
         using (theReader)
         {
+            bool cont = true;
+
             do
-            {
+            {                               
                 line = theReader.ReadLine();
+
+                if(line != null)
+                {
+                    if (!line.Contains("data=") && cont)
+                    {
+                        continue;
+                    }
+                    else if (line.Contains("data="))
+                    {
+                        cont = false;
+                        continue;
+                    }
+                }
+
+                if (_roomSize == 16)
+                    break;
 
                 if (line != null)
                 {

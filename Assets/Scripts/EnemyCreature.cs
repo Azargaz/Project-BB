@@ -11,15 +11,18 @@ public class EnemyCreature : LivingCreature
     Animator anim;
     EnemyAI controller;
     public int currency;
+    public bool dropLoot;
+    public int chanceToDropLoot;
+    public LootController.Loot.Rarity maxLootRarity;
 
-    void Awake()
+    protected void Awake()
     {        
         anim = GetComponent<Animator>();
         stats.Initialize();
         controller = GetComponent<EnemyAI>();
     }
 
-    void Start()
+    protected virtual void Start()
     {
         GameManager.instance.monsters.Add(gameObject);
     }
@@ -78,6 +81,14 @@ public class EnemyCreature : LivingCreature
         }
 
         CurrencyController.CC.AddCurrency(currency);
+
+        if(dropLoot && Random.value <= chanceToDropLoot / 100f)
+        {
+            GameObject clone = LootController.LC.RollLoot(maxLootRarity);
+
+            if (clone != null)
+                Instantiate(clone, transform.position, Quaternion.identity, transform.Find("Loot"));
+        }
 
         if (anim != null)
             anim.SetTrigger("Death");

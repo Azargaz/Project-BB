@@ -32,6 +32,8 @@ public class GenerateRooms : MonoBehaviour
     public List<Vector2> allPlatformFields = new List<Vector2>();
     [HideInInspector]
     public List<Vector2> allPedestals = new List<Vector2>();
+    [HideInInspector]
+    public List<Vector2> allSpikeFields = new List<Vector2>();
     List<Vector2> emptySpaces = new List<Vector2>();
     HashSet<Vector2> emptySpacesHash = new HashSet<Vector2>();
     HashSet<Vector2> ignoreFieldsHash = new HashSet<Vector2>();
@@ -111,6 +113,8 @@ public class GenerateRooms : MonoBehaviour
                 if (i == 0 && j == 0)
                     continue;
 
+                List<Vector2> spawnPoints = new List<Vector2>();
+
                 emptySpacesHash.Clear();
                 ignoreFieldsHash.Clear();
                 platformFieldsHash.Clear();
@@ -120,6 +124,7 @@ public class GenerateRooms : MonoBehaviour
                 platformFieldsHash.UnionWith(rooms[i, j].GetComponent<Room>().platformsFields);
 
                 emptySpaces = rooms[i, j].GetComponent<Room>().emptySpaces;
+                spawnPoints = rooms[i, j].GetComponent<Room>().spawnPoints;
 
                 #region Obstacles
 
@@ -157,15 +162,15 @@ public class GenerateRooms : MonoBehaviour
                 #region Monsters
 
                 int monstersPerRoom = 100;
-                int minibossesPerRoom = 0;
-
-                // DEACTIVATED: Minibosses spawning
-                //if (rooms[i, j].GetComponent<Room>().roomType == 6)
-                //    minibossesPerRoom = 1;
 
                 int infinityBreak = 0;
+
+                HashSet<int> occupiedSpawnPoints = new HashSet<int>();
+
                 do
                 {
+                    #region INFINITY BREAK
+
                     infinityBreak++;
                     if (infinityBreak > 20)
                     {
@@ -173,83 +178,51 @@ public class GenerateRooms : MonoBehaviour
                         break;
                     }
 
-                    for (int k = 0; k < emptySpaces.Count; k++)
+                    #endregion
+
+                    #region Break loop
+
+                    // If there are no monsters assigned, break the loop
+                    if (monsters.Length <= 0)
                     {
-                        float roll = Random.value;
-                        if (Random.value > chanceToSpawnMonsters / 100f && chanceToSpawnMonsters > 0)
-                            continue;
-
-                        #region Spawning monsters
-
-                        if (minibossesPerRoom <= 0)
-                        {
-                            // If there are no monsters assigned, break the loop
-                            if (monsters.Length <= 0)
-                            {
-                                if (debug)
-                                    Debug.LogWarning("No monsters to spawn.");
-                                break;
-                            }
-
-                            if (monstersPerRoom <= 0)
-                            {
-                                if (debug)
-                                    Debug.LogWarning("Monsters per this room exhausted.");
-                                break;
-                            }
-
-                            int monsterToSpawnID = RollWithWeights(monsters);
-
-                            GameObject monsterToSpawn = monsters[monsterToSpawnID].objects[Random.Range(0, monsters[monsterToSpawnID].objects.Length)];
-
-                            if (
-                                monsterToSpawn != null 
-                                && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) 
-                                && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1))
-                                //&& !platformFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1))
-                                )
-                            {
-                                Instantiate(monsterToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Mobs"));
-                                monstersPerRoom -= monsters[monsterToSpawnID].value;
-                            }
-                        }
-
-                        #endregion
-
-                        #region Spawning minibosses (type 6 room only, for now)
-
-                        else
-                        {
-                            if (minibosses.Length <= 0)
-                            {
-                                if (debug)
-                                    Debug.LogWarning("No minibosses to spawn.");
-
-                                minibossesPerRoom = 0;
-                                break;
-                            }
-
-                            if (minibossesPerRoom <= 0)
-                            {
-                                if (debug)
-                                    Debug.LogWarning("Monsters per this room exhausted.");
-                                break;
-                            }
-
-                            int minibossToSpawnID = RollWithWeights(minibosses);
-
-                            GameObject minibossToSpawn = minibosses[minibossToSpawnID].objects[Random.Range(0, monsters[minibossToSpawnID].objects.Length)];
-
-                            if (minibossToSpawn != null && !platformFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
-                            {
-                                Instantiate(minibossToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Mobs"));
-                                monstersPerRoom -= minibosses[minibossToSpawnID].value;
-                                minibossesPerRoom--;
-                            }
-                        }
-
-                        #endregion
+                        if (debug)
+                            Debug.LogWarning("No monsters to spawn.");
+                        break;
                     }
+
+                    if (monstersPerRoom <= 0)
+                    {
+                        if (debug)
+                            Debug.LogWarning("Monsters per this room exhausted.");
+                        break;
+                    }
+
+                    #endregion
+
+                    if (occupiedSpawnPoints.Count == spawnPoints.Count)
+                        occupiedSpawnPoints.Clear();
+
+                    int spawnPointNumber = 0;
+
+                    do
+                    {
+                        spawnPointNumber = Random.Range(0, spawnPoints.Count);
+                    }
+                    while(occupiedSpawnPoints.Contains(spawnPointNumber));
+
+                    int monsterToSpawnID = RollWithWeights(monsters);
+
+                    GameObject monsterToSpawn = monsters[monsterToSpawnID].objects[Random.Range(0, monsters[monsterToSpawnID].objects.Length)];
+
+                    if (
+                        monsterToSpawn != null
+                        )
+                    {
+                        Instantiate(monsterToSpawn, spawnPoints[spawnPointNumber], Quaternion.identity, transform.FindChild("Mobs"));
+                        monstersPerRoom -= monsters[monsterToSpawnID].value;
+                        occupiedSpawnPoints.Add(spawnPointNumber);
+                    }
+                    
                 }
                 while (monstersPerRoom > 10);
 
@@ -319,6 +292,8 @@ public class GenerateRooms : MonoBehaviour
 
                 allEmptySpaces.AddRange(thisRoom.emptySpaces);
                 allPlatformFields.AddRange(thisRoom.platformsFields);
+                allSpikeFields.AddRange(thisRoom.spikeFields);
+
                 if(thisRoom.weaponPedestals.Count > 0)
                     allPedestals.AddRange(thisRoom.weaponPedestals);
 

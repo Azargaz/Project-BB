@@ -62,12 +62,15 @@ public class PlayerWeaponController : MonoBehaviour
 
         if (!playerAttackAnimation && attackNumber != 0 && WeaponController.wc.eqWeaponCurAttack.staminaCost <= stats.curStamina)
         {
-            if(attackNumber <= eqWeapon.attacks.Length)
+            if (!WeaponController.wc.eqWeaponCurAttack.needFullCharge || WeaponController.wc.eqWeaponCurAttack.chargedStaminaCost <= stats.curStamina)
             {
-                StartAttack(attackNumber);
-            }
+                if (attackNumber <= eqWeapon.attacks.Length)
+                {
+                    StartAttack(attackNumber);
+                }
 
-            attackNumber = 0;
+                attackNumber = 0;
+            }   
         }
 
         if (!playerAttackAnimation && stats.animationBusy)            
@@ -271,7 +274,19 @@ public class PlayerWeaponController : MonoBehaviour
 
             if (fullyCharged && curAttack.crit)
                 stats.damage = (int)(curAttack.chargedDamage * curAttack.criticalMultiplier);
-        }        
+        }  
+        
+        if(curAttack.chargable && curAttack.needFullCharge)
+        {
+            if (fullyCharged)
+            {
+                stats.damage = curAttack.chargedDamage;
+                stats.knockbackPower = curAttack.chargedKnockbackPower;
+            }
+
+            if (fullyCharged && curAttack.crit)
+                stats.damage = (int)(curAttack.chargedDamage * curAttack.criticalMultiplier);
+        }      
     }
 
     #endregion

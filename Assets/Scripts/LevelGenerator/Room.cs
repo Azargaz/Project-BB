@@ -11,13 +11,16 @@ public class Room : MonoBehaviour
     GameObject platform;
     GameObject spikes;
     GameObject weaponPedestal;
-    public GameObject exit;
+    GameObject exit;
+    GameObject spawnPoint;
     bool exitSpawned;
     public string[] layout = new string[16];
     public List<Vector2> emptySpaces = new List<Vector2>();
     public List<Vector2> ignoreFields = new List<Vector2>();
+    public List<Vector2> spikeFields = new List<Vector2>();
     public List<Vector2> weaponPedestals = new List<Vector2>();
     public List<Vector2> platformsFields = new List<Vector2>();
+    public List<Vector2> spawnPoints = new List<Vector2>();
     bool blocked;
     List<GameObject> blockade = new List<GameObject>();
     public ImportRoomLayouts RT;
@@ -32,6 +35,7 @@ public class Room : MonoBehaviour
             spikes = RT.spikes;
             weaponPedestal = RT.weaponPedestal;
             exit = RT.exit;
+            spawnPoint = RT.spawnPoint;
 
             ImportRoomLayouts.Room thisRoomType = RT.roomTypes[roomType];
             roomSize = thisRoomType.roomSize;
@@ -131,15 +135,6 @@ public class Room : MonoBehaviour
 
             for (int j = 0; j < layout[i].Length; j++)
             {          
-                // SPAWNING JUST BACKGROUNDS     
-                if(layout[i][j] == '0' && background != null)
-                {
-                    GameObject bg = Instantiate(background);
-                    bg.transform.parent = transform;
-                    bg.transform.localPosition = new Vector2(j, layout.Length - i - 1);
-
-                    emptySpaces.Add(bg.transform.position);
-                }
                 // SPAWNING NORMAL TILES
                 if (layout[i][j] == '1' && ground != null)
                 {
@@ -171,6 +166,24 @@ public class Room : MonoBehaviour
                     clone.transform.localPosition = new Vector2(j, layout.Length - i - 1);
 
                     ignoreFields.Add(clone.transform.position);
+                    spikeFields.Add(clone.transform.position);
+
+                    if (background != null)
+                    {
+                        GameObject bg = Instantiate(background);
+                        bg.transform.parent = transform;
+                        bg.transform.localPosition = new Vector2(j, layout.Length - i - 1);
+                    }
+                }
+                // SPAWNING MONSTERS SPAWN POINTS   
+                else if (layout[i][j] == '4' && spawnPoint != null)
+                {
+                    GameObject clone = Instantiate(spawnPoint);
+                    clone.transform.parent = transform;
+                    clone.transform.localPosition = new Vector2(j, layout.Length - i - 1);
+
+                    spawnPoints.Add(clone.transform.position);
+                    emptySpaces.Add(clone.transform.position);
 
                     if (background != null)
                     {
@@ -180,7 +193,7 @@ public class Room : MonoBehaviour
                     }
                 }
                 // SPAWNING WEAPON PEDESTALS WITH BACKGROUNDS   
-                else if (layout[i][j] == '4' && weaponPedestal != null)
+                else if (layout[i][j] == '5' && weaponPedestal != null)
                 {
                     GameObject clone = Instantiate(weaponPedestal);
                     clone.transform.parent = transform;
@@ -194,6 +207,18 @@ public class Room : MonoBehaviour
                         GameObject bg = Instantiate(background);
                         bg.transform.parent = transform;
                         bg.transform.localPosition = new Vector2(j, layout.Length - i - 1);
+                    }
+                }
+                else
+                {
+                    // SPAWNING JUST BACKGROUNDS     
+                    if (background != null)
+                    {
+                        GameObject bg = Instantiate(background);
+                        bg.transform.parent = transform;
+                        bg.transform.localPosition = new Vector2(j, layout.Length - i - 1);
+
+                        emptySpaces.Add(bg.transform.position);
                     }
                 }
             }

@@ -156,6 +156,8 @@
     <None Include="Assets\Editor\_RoomLayouts\type4\1.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type4\2.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type5\0.txt" />
+    <None Include="Assets\Editor\_RoomLayouts\type5\1.txt" />
+    <None Include="Assets\Editor\_RoomLayouts\type5\2.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type6\0.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type6\1.txt" />
     <None Include="Assets\Scripts\InvertColorsShader.shader" />

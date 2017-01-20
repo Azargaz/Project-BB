@@ -47,7 +47,7 @@ public class WeaponPedestal : MonoBehaviour
 
         if (player != null)
         {
-            if (Input.GetButtonDown("PickupWeapon") && !player.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
+            if (Input.GetButtonDown("Interact") && !player.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("attack_player"))
             {
                 SwapWeapon();
             }
