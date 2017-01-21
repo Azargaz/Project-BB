@@ -276,7 +276,7 @@ public class PlayerWeaponController : MonoBehaviour
                 stats.damage = (int)(curAttack.chargedDamage * curAttack.criticalMultiplier);
         }  
         
-        if(curAttack.chargable && curAttack.needFullCharge)
+        if(curAttack.chargable && !curAttack.scaleDamageWithChargeTime)
         {
             if (fullyCharged)
             {

@@ -160,7 +160,7 @@
     <None Include="Assets\Editor\_RoomLayouts\type5\2.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type6\0.txt" />
     <None Include="Assets\Editor\_RoomLayouts\type6\1.txt" />
-    <None Include="Assets\Scripts\InvertColorsShader.shader" />
+    <None Include="Assets\Other\InvertColorsShader.shader" />
     <None Include="Assets\Shaders\Splatter\Splatter.shader" />
     <None Include="Assets\Shaders\Splatter\Surface.shader" />
   </ItemGroup>
