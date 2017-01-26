@@ -8,12 +8,52 @@ public class PlayerCreature : LivingCreature
     Animator anim;
     Player controller;
 
+    [Header("Health Potion")]
+    [SerializeField]
+    HealthPotion hPotion;
+
+    [System.Serializable]
+    public class HealthPotion
+    {
+        public int maxUses;
+        [HideInInspector]
+        public int uses;
+        public int healAmount;
+        public int killsPerRestoredUse;
+        int killCount = 0;
+
+        public void updateUses()
+        {
+            if (killCount >= killsPerRestoredUse && uses < maxUses)
+            {
+                uses++;
+                killCount -= killsPerRestoredUse;
+            }
+        }
+
+        public void addKills(int amount)
+        {
+            if (uses == maxUses)
+                return;
+
+            killCount += amount;
+        }
+
+        public void Initialize()
+        {
+            uses = maxUses;
+        }
+    }
+
     void Awake()
     {
         DontDestroyOnLoad(this);
+
         anim = GetComponent<Animator>();
-        stats.Initialize();
         controller = GetComponent<Player>();
+
+        stats.Initialize();        
+        hPotion.Initialize();
     }
 
     protected override void Update()
@@ -22,6 +62,15 @@ public class PlayerCreature : LivingCreature
             return;
 
         base.Update();
+
+        #region Health potion
+
+        if (Input.GetKeyDown(KeyCode.E))
+            usePotion();
+
+        hPotion.updateUses();
+
+        #endregion
 
         #region Restore health
 
@@ -57,8 +106,39 @@ public class PlayerCreature : LivingCreature
         #endregion
     }
 
+    #region Health potion
+
+    public void usePotion()
+    {
+        if (stats.curHealth >= stats.maxHealth)
+            return;
+
+        if (hPotion.uses <= 0)
+            return;
+
+        hPotion.uses--;
+        Heal(hPotion.healAmount);
+    }
+
+    public int GetPotionMaxUses()
+    {
+        return hPotion.maxUses;
+    }
+
+    public int GetPotionUses()
+    {
+        return hPotion.uses;
+    }
+
+    public void AddPotionKillCount(int amount)
+    {
+        hPotion.addKills(amount);
+    }
+
+    #endregion
+
     #region Restore health
-    
+
     [HideInInspector]
     public int healthToRestore = 0;
 
@@ -74,8 +154,6 @@ public class PlayerCreature : LivingCreature
     [SerializeField]
     float timeForRH;
     float timeToRH;
-    [SerializeField]
-    GameObject healthRestoreDisplay;
 
     public void RestoreHealthAfterAttack()
     {
@@ -91,18 +169,7 @@ public class PlayerCreature : LivingCreature
         else
             amount = healthToRestore;
         healthToRestore -= amount;
-        stats.curHealth += amount;
-
-        if(healthRestoreDisplay != null)
-        {
-            GameObject clone = Instantiate(healthRestoreDisplay, transform.position, Quaternion.identity);
-            Text txt = clone.transform.GetChild(0).GetComponent<Text>();
-
-            txt.text = "+" + amount;
-            clone.GetComponent<Animator>().SetTrigger("Display");
-            clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
-            Destroy(clone, 1f);
-        }
+        Heal(amount);
     }
 
     #endregion

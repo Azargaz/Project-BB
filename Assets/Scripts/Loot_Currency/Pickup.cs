@@ -11,19 +11,7 @@ public class Pickup : MonoBehaviour
 
     void HealthPotion()
     {
-        playerCreature.stats.curHealth += 50;
-
-        if(numbersDisplay != null)
-        {
-            GameObject clone = Instantiate(numbersDisplay, transform.position, Quaternion.identity);
-            Text txt = clone.transform.GetChild(0).GetComponent<Text>();
-            
-            txt.text = "+" + 50;
-
-            clone.GetComponent<Animator>().SetTrigger("Display");
-            clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
-            Destroy(clone, 1f);
-        }
+        playerCreature.Heal(50);
     }
 
     void Pickedup()

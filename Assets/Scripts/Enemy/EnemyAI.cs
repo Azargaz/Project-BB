@@ -13,10 +13,11 @@ public class EnemyAI : MonoBehaviour
     [Header("Base AI")]
     public float range = 10f;    
     public float minDistanceFromTarget = 0.5f;
-
+    public float runawayRange = 0f;
+    protected bool runaway;
     public bool canJump = true;
     public bool canDropDown = true;
-    public bool hovering = false;
+    public bool hovering = false;    
     [SerializeField]
     protected bool canAttack = true;
     protected bool jump = false;
@@ -224,6 +225,7 @@ public class EnemyAI : MonoBehaviour
 
         Vector2 targetPosDifference = target.position - transform.position;
         float distToTarget = Vector2.Distance(target.position, transform.position);
+        runaway = false;
 
         // If player is out of range return
         if (distToTarget > range)
@@ -232,16 +234,16 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("The target is out of range.");
 
             return EnemyState.idle;
-        }
+        }        
 
         float randomizedAttackRange;
 
         if (minDistanceFromTarget < attackRange)
-            randomizedAttackRange = Random.Range(minDistanceFromTarget, attackRange);
+            randomizedAttackRange = attackRange;
         else
-            randomizedAttackRange = Random.Range(attackRange, minDistanceFromTarget);
+            randomizedAttackRange = attackRange;
 
-        // If player is in attack range and attack isn't on cooldown, attack
+        // If player is in attack range and attack isn't on cooldown, attack       
         if (attackTimer <= 0 && !attacked && controller.collisions.below && canAttack)
         {            
             if (distToTarget <= randomizedAttackRange)
@@ -256,6 +258,12 @@ public class EnemyAI : MonoBehaviour
             if ((!canJump || !canDropDown) && Mathf.Abs(targetPosDifference.x) < minDistanceFromTarget)
                 return EnemyState.stop;
 
+            if (distToTarget < runawayRange)
+            {
+                runaway = true;
+                return EnemyState.walk;
+            }
+
             if (distToTarget <= attackRange)
                 return EnemyState.stop;
 
@@ -267,6 +275,12 @@ public class EnemyAI : MonoBehaviour
         {
             if ((!canJump || !canDropDown) && Mathf.Abs(targetPosDifference.x) < minDistanceFromTarget)
                 return EnemyState.stop;
+
+            if (distToTarget < runawayRange)
+            {
+                runaway = true;
+                return EnemyState.walk;
+            }
 
             return EnemyState.walk;
         }

@@ -214,7 +214,7 @@ public class PlayerWeaponController : MonoBehaviour
         if (curAttack.crit)
         {
             Color attackColor = attackAnim.GetComponentInChildren<SpriteRenderer>().color;
-            attackColor = new Color(0.9f, 0, 0);
+            attackColor = new Color(1f, 1f, 0);
             attackAnim.GetComponentInChildren<SpriteRenderer>().color = attackColor;
         }
         else
@@ -254,11 +254,11 @@ public class PlayerWeaponController : MonoBehaviour
                 float chargeDmgMultiplier = 1f;
 
                 if (chargePercent >= 0.25f && chargePercent < 0.5f)
-                    chargeDmgMultiplier = 1.5f;
+                    chargeDmgMultiplier = curAttack.damageScales[0];
                 else if (chargePercent >= 0.5f && chargePercent < 0.75f)
-                    chargeDmgMultiplier = 2f;
+                    chargeDmgMultiplier = curAttack.damageScales[1];
                 else if (chargePercent >= 0.7f)
-                    chargeDmgMultiplier = 3f;
+                    chargeDmgMultiplier = curAttack.damageScales[2];
 
                 if (curAttack.crit)
                     stats.damage = (int)(curAttack.criticalDamage * chargeDmgMultiplier);

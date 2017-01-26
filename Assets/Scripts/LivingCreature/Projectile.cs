@@ -19,9 +19,12 @@ public class Projectile : DamageLivingCreature
     public bool freeze;
     public bool pause;
 
+    Animator anim;
+
     protected override void Awake()
     {
         controller = GetComponent<Controller2D>();
+        anim = GetComponent<Animator>();
     }
 
     void Start()
@@ -41,11 +44,19 @@ public class Projectile : DamageLivingCreature
 
         if (freeze)
         {
+            if(anim != null)
+                anim.speed = Mathf.Lerp(anim.speed, 0, freezeSmoothTime);
+
             storedVelocity = velocity;
             velocity = Vector3.Lerp(storedVelocity, Vector3.zero, freezeSmoothTime);
             freezeSmoothTime += Time.deltaTime / 10000f;
             controller.Move(velocity * Time.deltaTime);
             return;
+        }
+        else
+        {
+            if(anim != null)
+                anim.speed = Mathf.Lerp(anim.speed, 1, freezeSmoothTime);
         }
 
         lifeTime -= Time.deltaTime;
@@ -63,9 +74,20 @@ public class Projectile : DamageLivingCreature
     {
         base.AfterHit(targetHit);
 
-        if(targetHit.layer == 9 || (!pierce && (targetHit.layer == 10 || targetHit.layer == 13)))
+        if(target == Target.enemy)
         {
-            Destroy(gameObject);
+            if (targetHit.layer == 9 || (!pierce && (targetHit.layer == 10 || targetHit.layer == 13)))
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        if(target == Target.player)
+        {
+            if (targetHit.layer == 9 || (!pierce && (targetHit.layer == 8 || targetHit.layer == 15)))
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

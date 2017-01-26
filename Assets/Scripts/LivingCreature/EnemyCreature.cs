@@ -36,8 +36,9 @@ public class EnemyCreature : LivingCreature
     {
         base.Damage(damageTaken, dmgSource, knockbackPower);
 
-        if (dmgSource is SummonCreature && dmgSource.transform != null)
-            controller.enemyTarget = dmgSource.transform;
+        if (dmgSource is SummonCreature)
+            if(dmgSource.transform != null)
+                controller.enemyTarget = dmgSource.transform;
 
         if (stats.invincible)
             return false;
@@ -73,6 +74,9 @@ public class EnemyCreature : LivingCreature
     public override void Kill()
     {
         base.Kill();
+
+        QuestLogController.QL.AddEnemyKill(gameObject.name);
+        GameManager.player.GetComponent<PlayerCreature>().AddPotionKillCount(currency);
 
         if (deathParticles != null)
         {

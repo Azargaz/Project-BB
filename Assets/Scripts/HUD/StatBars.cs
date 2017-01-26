@@ -32,7 +32,7 @@ public class StatBars : MonoBehaviour
                     RectTransform rt = GetComponent<RectTransform>();
                     float stat = stats.maxHealth;
                     rt.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
-                    bg.sizeDelta = new Vector2(stat + 2, rt.sizeDelta.y + 2);
+                    bg.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, (float) stats.curHealth / stats.maxHealth, 0.15f);
                     break;
@@ -42,7 +42,7 @@ public class StatBars : MonoBehaviour
                     RectTransform rt = GetComponent<RectTransform>();
                     float stat = stats.maxStamina;
                     rt.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
-                    bg.sizeDelta = new Vector2(stat + 2, rt.sizeDelta.y + 2);
+                    bg.sizeDelta = new Vector2(stat, rt.sizeDelta.y);
 
                     GetComponent<Image>().fillAmount = Mathf.Lerp(GetComponent<Image>().fillAmount, stats.curStamina / stats.maxStamina, 0.15f);                    
                     break;

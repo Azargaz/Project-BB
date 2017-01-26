@@ -112,6 +112,7 @@ public abstract class LivingCreature : MonoBehaviour
 
     public Statistics stats = new Statistics();
     public GameObject damageDisplay;
+    public GameObject healDisplay;
 
     void Start()
     {
@@ -185,7 +186,7 @@ public abstract class LivingCreature : MonoBehaviour
                 Text txt = clone.transform.GetChild(0).GetComponent<Text>();
 
                 if (dmgSource is PlayerCreature)
-                    txt.text = damageTaken.ToString() + (WeaponController.wc.eqWeaponCurAttack.crit ? "!" : "");
+                    txt.text = (WeaponController.wc.eqWeaponCurAttack.crit ? "<color=yellow>CRIT " : "") + damageTaken.ToString() + (WeaponController.wc.eqWeaponCurAttack.crit ? "!</color>" : "");
                 else
                     txt.text = damageTaken.ToString();
 
@@ -197,6 +198,29 @@ public abstract class LivingCreature : MonoBehaviour
             stats.Invincibility();
             return true;
         }               
+    }
+
+    public virtual void Heal(int healAmount)
+    {
+        if (stats.curHealth >= stats.maxHealth)
+            return;
+
+        if (healAmount > stats.maxHealth - stats.curHealth)
+            healAmount = stats.maxHealth - stats.curHealth;
+
+        stats.curHealth += healAmount;
+
+        if (healDisplay != null)
+        {
+            GameObject clone = Instantiate(healDisplay, transform.position, Quaternion.identity);
+            Text txt = clone.transform.GetChild(0).GetComponent<Text>();
+            
+            txt.text = "+" + healAmount;
+
+            clone.GetComponent<Animator>().SetTrigger("Display");
+            clone.transform.SetParent(GameObject.Find("DamageNumbers").transform);
+            Destroy(clone, 1f);
+        }
     }
 
     public virtual void Kill()

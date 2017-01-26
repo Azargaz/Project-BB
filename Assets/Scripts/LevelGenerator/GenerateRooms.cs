@@ -17,6 +17,7 @@ public class GenerateRooms : MonoBehaviour
 
     public GameObject border;
     public GameObject borderBg;
+    public GameObject questboard;
     public GameObject test;
     public Obstacle[] obstacles;
     public Monster[] monsters;
@@ -24,6 +25,8 @@ public class GenerateRooms : MonoBehaviour
 
     public float chanceToSpawnObstacles;
     public float chanceToSpawnMonsters;
+    public float chanceToSpawnQuestboard;
+    public int questboardsPerLevel = 1;
 
     Vector2 exitRoom;
     [HideInInspector]
@@ -44,6 +47,8 @@ public class GenerateRooms : MonoBehaviour
     {
         public string name;
         public GameObject[] objects;
+        public bool limit = false;
+        public int maxPerLevel;
         public int chanceToSpawnWeight;
     }
 
@@ -63,15 +68,19 @@ public class GenerateRooms : MonoBehaviour
     {
         GR = this;
         RT = GameObject.FindGameObjectWithTag("RoomLayouts").GetComponent<ImportRoomLayouts>();
-        numberOfRooms = (int) Mathf.Pow(sqrtNumberOfRooms, 2);
-        rooms = new GameObject[sqrtNumberOfRooms, sqrtNumberOfRooms];
-        GenerateRoom(new int[] { 1, 2 }, 0, 0);
-        SpawnRooms();
-        CreateBorder(-15);              
+
+        StartGeneration();            
     }
 
-    void Start()
+    void StartGeneration()
     {
+        numberOfRooms = (int)Mathf.Pow(sqrtNumberOfRooms, 2);
+        rooms = new GameObject[sqrtNumberOfRooms, sqrtNumberOfRooms];
+
+        GenerateRoom(new int[] { 1, 2 }, 0, 0);
+        SpawnRooms();
+        CreateBorder(-15);
+
         SpawnObstaclesAndMonsters();
         AstarPath.active.Scan();
     }
@@ -86,6 +95,9 @@ public class GenerateRooms : MonoBehaviour
 
         for (int x = 0; x < array.Length; x++)
         {
+            if (array[x].limit && array[x].maxPerLevel <= 0)
+                continue;
+
             summedWeights += array[x].chanceToSpawnWeight;
         }
 
@@ -113,6 +125,8 @@ public class GenerateRooms : MonoBehaviour
                 if (i == 0 && j == 0)
                     continue;
 
+                #region Hashsets and Lists
+
                 List<Vector2> spawnPoints = new List<Vector2>();
 
                 emptySpacesHash.Clear();
@@ -125,6 +139,8 @@ public class GenerateRooms : MonoBehaviour
 
                 emptySpaces = rooms[i, j].GetComponent<Room>().emptySpaces;
                 spawnPoints = rooms[i, j].GetComponent<Room>().spawnPoints;
+
+                #endregion
 
                 #region Obstacles
 
@@ -153,6 +169,7 @@ public class GenerateRooms : MonoBehaviour
                     if (obstacleToSpawn != null && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
                     {
                         Instantiate(obstacleToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Obstacles"));
+                        obstacles[obstacleToSpawnID].maxPerLevel--;
                     }
                     
                 }
@@ -218,13 +235,34 @@ public class GenerateRooms : MonoBehaviour
                         monsterToSpawn != null
                         )
                     {
-                        Instantiate(monsterToSpawn, spawnPoints[spawnPointNumber], Quaternion.identity, transform.FindChild("Mobs"));
+                        GameObject clone = Instantiate(monsterToSpawn, spawnPoints[spawnPointNumber], Quaternion.identity, transform.FindChild("Mobs"));
+                        clone.name = monsterToSpawn.name;
+
                         monstersPerRoom -= monsters[monsterToSpawnID].value;
                         occupiedSpawnPoints.Add(spawnPointNumber);
                     }
                     
                 }
                 while (monstersPerRoom > 10);
+
+                #endregion
+
+                #region Questboard
+
+                if(questboard != null && questboardsPerLevel > 0)
+                {
+                    float rollQuestboard = 0;
+                    rollQuestboard = Random.value;
+
+                    if (rollQuestboard <= chanceToSpawnQuestboard / 100f)
+                    {
+                        int spawnPointID = 0;
+                        spawnPointID = Random.Range(0, spawnPoints.Count);
+
+                        Instantiate(questboard, spawnPoints[spawnPointID], Quaternion.identity, transform);
+                        questboardsPerLevel--;
+                    }
+                }
 
                 #endregion
             }
@@ -241,9 +279,9 @@ public class GenerateRooms : MonoBehaviour
 
                 #region Changing room types
 
-                if (y < rooms.GetLength(1) - 1 && thisRoom.roomType != 6)
+                if (y < rooms.GetLength(1) - 1)
                 {
-                    if(thisRoom.roomType == 2 || thisRoom.roomType == 4 || thisRoom.roomType == 5)
+                    if(thisRoom.roomType == 2 || thisRoom.roomType == 4 || thisRoom.roomType == 5 || thisRoom.roomType == 6)
                     {
                         Room aboveRoom = rooms[x, y + 1].GetComponent<Room>();
 

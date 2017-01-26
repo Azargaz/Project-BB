@@ -19,6 +19,17 @@ public class GroundEnemyAI : EnemyAI
     protected float velocityXSmoothing;
     protected int facing = 1;
 
+    [Header("Attacks")]
+    public Attack[] attacks;
+
+    [System.Serializable]
+    public class Attack
+    {
+        public string name;
+        public int attackID;
+        public int chanceToSpawnWeight;
+    }
+
     [Header("")]
     public bool debug;
 
@@ -76,8 +87,15 @@ public class GroundEnemyAI : EnemyAI
                 {
                     if(pathfinding)
                         Pathfinding();
-
+                    
                     input = targetDirection;
+
+                    if(runaway)
+                    {
+                        runaway = false;
+                        input.x *= -1;
+                    }
+
                     break;
                 }
             case EnemyState.attack:
@@ -85,7 +103,7 @@ public class GroundEnemyAI : EnemyAI
                     creature.stats.animationBusy = true;
                     input.y = 0;
                     Animations(input.x);
-                    anim.SetTrigger("Attack");                 
+                    anim.SetTrigger("Attack");             
                     break;
                 }
         }
@@ -95,7 +113,7 @@ public class GroundEnemyAI : EnemyAI
         // Block movement if stunned or busy
         if (creature.stats.animationBusy)
         {
-            input.x = 0;
+            input = Vector2.zero;
         }
 
         if(creature.stats.stunned)
@@ -144,12 +162,17 @@ public class GroundEnemyAI : EnemyAI
         if (input != 0)
         {
             facing = input > 0 ? 1 : -1;
-            Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
-
+            
             if (transform.FindChild("Hitbox") != null)
             {
+                Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
                 hitboxPos.x = facing * Mathf.Abs(hitboxPos.x);
                 transform.FindChild("Hitbox").localPosition = hitboxPos;
+            }
+
+            if(transform.FindChild("Projectile") != null)
+            {
+                transform.FindChild("Projectile").localScale = new Vector3(facing, 1, 1);
             }
 
             GetComponent<SpriteRenderer>().flipX = facing < 0;            
@@ -157,5 +180,41 @@ public class GroundEnemyAI : EnemyAI
 
         anim.SetFloat("Input", Mathf.Abs(input));
         //anim.SetBool("Grounded", controller.collisions.below);
+    }
+
+    void AnimationSpawnProjectile()
+    {
+        if(GetComponentInChildren<SpawnProjectile>() != null)
+        {
+            GetComponentInChildren<SpawnProjectile>().AnimationSpawnProjectile();
+        }
+    }
+
+    protected int RollWithWeights(Attack[] array)
+    {
+        int summedWeights = 0;
+        int returnInt = 0;
+
+        if (array.Length <= 1)
+            return 0;
+
+        for (int x = 0; x < array.Length; x++)
+        {
+            summedWeights += array[x].chanceToSpawnWeight;
+        }
+
+        for (int x = 0; x < array.Length; x++)
+        {
+            int random = Random.Range(0, summedWeights);
+            random -= array[x].chanceToSpawnWeight;
+
+            if (random <= 0)
+            {
+                returnInt = array[x].attackID;
+                break;
+            }
+        }
+
+        return returnInt;
     }
 }

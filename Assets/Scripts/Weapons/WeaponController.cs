@@ -73,6 +73,8 @@ public class WeaponController : MonoBehaviour
             public bool chargable = false; // Can this attack be charged?
             public bool needFullCharge = false; // Do you need to charge this attack for full time?
             public bool scaleDamageWithChargeTime = false; // Scale damage with how long player has charged, works only if full charge isn't needed
+            [Tooltip("Ignore this if damage doesn't scale with charge time.")]
+            public float[] damageScales;
             [Range(0, 5)]
             public float chargeTime = 1f; // How long does player have to hold button for attack to be fully charged     
             [HideInInspector]

@@ -15,7 +15,7 @@ public class SpawnProjectile : MonoBehaviour
         firePointInitialPos = firePoint.localPosition;
     }
 
-    protected virtual void AnimationSpawnProjectile()
+    public virtual void AnimationSpawnProjectile()
     {
         if (projectileObject == null)
             return;
@@ -26,6 +26,9 @@ public class SpawnProjectile : MonoBehaviour
         Projectile projectile = clone.GetComponent<Projectile>();
         clone.transform.localScale = new Vector2(transform.parent.localScale.x, 1);
 
+        if (transform.parent.GetComponent<EnemyCreature>() != null)
+            clone.transform.localScale = new Vector2(transform.localScale.x, 1);
+
         if (transform.root.GetComponent<LivingCreature>() != null)
         {
             projectile.creature = transform.root.GetComponent<LivingCreature>();
@@ -35,6 +38,9 @@ public class SpawnProjectile : MonoBehaviour
             projectile.creature = transform.parent.GetComponent<LivingCreature>();
         }
 
-        projectile.input.x = transform.parent.localScale.x;        
+        projectile.input.x = transform.parent.localScale.x;
+
+        if (transform.parent.GetComponent<EnemyCreature>() != null)
+            projectile.input.x = transform.localScale.x;
     }
 }

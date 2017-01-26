@@ -12,10 +12,17 @@ public class GameManager : MonoBehaviour
     public static GameObject player;
     public List<GameObject> monsters = new List<GameObject>();
     public List<GameObject> flyingProjectiles;
+
     public bool pause;
     bool passiveMenuOpen;
+    bool questLogOpen;
+    bool questboardOpen;
+
+    GameObject staticHUD;
     GameObject pauseMenu;
     GameObject passiveMenu;
+    public GameObject questLog;
+    public GameObject questboard;
     public static List<Passive> passives = new List<Passive>();
 
     #region Currency
@@ -32,29 +39,48 @@ public class GameManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
 
-        if (player == null && SceneManager.GetActiveScene().buildIndex == 1)
+        if (SceneManager.GetActiveScene().buildIndex == 1)
         {
-            player = Instantiate(playerPrefab);
-            player.transform.position = new Vector3(0, 6, 0);
-        }
+            if (player == null)
+            {
+                player = Instantiate(playerPrefab);
+                player.transform.position = new Vector3(0, 6, 0);
+            }
 
-        if(passiveMenu == null && SceneManager.GetActiveScene().buildIndex == 1)
-        {
-            passiveMenu = Instantiate(staticHUDPrefab, transform).transform.GetChild(0).gameObject;
-            passiveMenu.SetActive(false);
+            if (pauseMenu == null)
+            {
+                pauseMenu = GameObject.FindGameObjectWithTag("Pause");
+                pauseMenu.SetActive(false);
+            }
+
+            if (staticHUD == null)
+            {
+                staticHUD = Instantiate(staticHUDPrefab, transform);
+            }
+
+            if (passiveMenu == null)
+            {
+                passiveMenu = staticHUD.transform.FindChild("Passives").gameObject;
+                passiveMenu.SetActive(false);
+            }
+
+            if (questLog == null)
+            {
+                questLog = staticHUD.transform.FindChild("QuestLog").gameObject;
+                questLog.SetActive(false);
+            }
+
+            if (questboard == null)
+            {
+                questboard = staticHUD.transform.FindChild("Questboard").gameObject;
+                questboard.SetActive(false);
+            }
         }
     }
 
     void Update()
     {
-        if (SceneManager.GetActiveScene().buildIndex == 2)
-        {
-            if(Input.GetButtonDown("Submit"))
-            {
-                LoadScene(1);
-            }            
-        }
-        else if (SceneManager.GetActiveScene().buildIndex == 1)
+        if (SceneManager.GetActiveScene().buildIndex == 1)
         {           
             if (pauseMenu == null)
             {
@@ -62,30 +88,50 @@ public class GameManager : MonoBehaviour
                 pauseMenu.SetActive(false);
             }
 
-            if(passiveMenu == null)
+            if (staticHUD == null)
             {
-                passiveMenu = GameObject.FindGameObjectWithTag("Passives");
+                staticHUD = Instantiate(staticHUDPrefab, transform);
+            }
 
-                if(passiveMenu == null)
-                    passiveMenu = Instantiate(staticHUDPrefab, transform).transform.GetChild(0).gameObject;
-
+            if (passiveMenu == null)
+            {
+                passiveMenu = staticHUD.transform.FindChild("Passives").gameObject;
                 passiveMenu.SetActive(false);
+            }
+
+            if (questLog == null)
+            {
+                questLog = staticHUD.transform.FindChild("QuestLog").gameObject;
+                questLog.SetActive(false);
+            }
+
+            if(questboard == null)
+            {
+                questboard = staticHUD.transform.FindChild("Questboard").gameObject;
+                questboard.SetActive(false);
             }
 
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Joystick1Button7))
             {
-                if(!passiveMenuOpen)
-                    PauseUnPause(pauseMenu);
+                if (!OpenPauseMenu())
+                {
+                    if (questLogOpen)
+                        OpenQuestLog();
+                    else if (passiveMenuOpen)
+                        OpenPassiveMenu();
+                    else if (questboardOpen)
+                        OpenQuestboard();                        
+                }
+            }
+
+            if(Input.GetButtonDown("QuestLog") || (questLogOpen && Input.GetButtonDown("Interact")))
+            {
+                OpenQuestLog();
             }
 
             if(Input.GetKeyDown(KeyCode.Tab))
             {
-                if(!pause || passiveMenuOpen)
-                {
-                    passiveMenuOpen = !passiveMenuOpen;
-
-                    PauseUnPause(passiveMenu);
-                }            
+                OpenPassiveMenu();
             }
 
             if (Input.GetButtonDown("Submit"))
@@ -107,11 +153,52 @@ public class GameManager : MonoBehaviour
             if (lastCurrentCurrency == displayCurrency)
                 displayCurrency = currentCurrency;
 
-            currency.text = "$$$: " + Mathf.RoundToInt(displayCurrency);
+            currency.text = "" + Mathf.RoundToInt(displayCurrency) + "$";
 
             lastCurrentCurrency = displayCurrency;
 
             #endregion
+        }
+    }
+
+    public bool OpenPauseMenu()
+    {
+        if (!passiveMenuOpen && !questLogOpen && !questboardOpen)
+        {
+            PauseUnPause(pauseMenu);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public void OpenQuestLog()
+    {
+        if ((!pause && !passiveMenuOpen) || questLogOpen)
+        {
+            questLogOpen = !questLogOpen;
+
+            PauseUnPause(questLog);
+        }
+    }
+
+    public void OpenQuestboard()
+    {
+        if ((!pause && !questboardOpen) || questboardOpen)
+        {
+            questboardOpen = !questboardOpen;
+
+            PauseUnPause(questboard);
+        }
+    }
+
+    void OpenPassiveMenu()
+    {
+        if ((!pause && !questLogOpen) || passiveMenuOpen)
+        {
+            passiveMenuOpen = !passiveMenuOpen;
+
+            PauseUnPause(passiveMenu);
         }
     }
 
@@ -150,11 +237,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void ResetPassives()
+    void Reset()
     {
         for (int i = 0; i < passives.Count; i++)
         {
             passives[i].passive.Reset();
+        }
+
+        QuestLogController.QL.ResetQuests();
+
+        foreach (Transform child in questboard.transform.FindChild("QuestsSpace"))
+        {
+            Destroy(child.gameObject);
         }
     }
 
@@ -169,15 +263,18 @@ public class GameManager : MonoBehaviour
     {
         CurrencyController.CC.ResetCurrency();
         Destroy(player);
-        ResetPassives();
+        Reset();
         LoadScene(1);
     }
 
     public void LoadScene(int i)
     {
+        if (SceneManager.GetActiveScene().buildIndex != 1)
+            Destroy(gameObject);
+
         if (pauseMenu != null)
         {
-            if (pause && !passiveMenuOpen)
+            if (pause && !passiveMenuOpen && !questLogOpen && !questboardOpen)
                 PauseUnPause(pauseMenu);
         }
 
@@ -187,6 +284,22 @@ public class GameManager : MonoBehaviour
                 PauseUnPause(passiveMenu);
 
             passiveMenuOpen = false;
+        }
+
+        if(questLog != null)
+        {
+            if (pause && questLogOpen)
+                PauseUnPause(questLog);
+
+            questLogOpen = false;
+        }
+
+        if (questboard != null)
+        {
+            if (pause && questboardOpen)
+                PauseUnPause(questboard);
+
+            questboardOpen = false;
         }
 
         CurrencyController.CC.ResetRerollCost();

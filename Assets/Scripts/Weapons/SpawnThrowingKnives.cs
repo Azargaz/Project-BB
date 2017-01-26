@@ -8,7 +8,7 @@ public class SpawnThrowingKnives : SpawnProjectile
     int numberOfKnivesCharged;
     int numberOfKnives;
 
-    protected override void AnimationSpawnProjectile()
+    public override void AnimationSpawnProjectile()
     {
         if (projectileObject == null)
             return;
