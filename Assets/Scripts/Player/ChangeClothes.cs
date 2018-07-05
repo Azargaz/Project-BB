@@ -14,24 +14,27 @@ public class ChangeClothes : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha0))
+        if(Input.GetKey(KeyCode.C))
         {
-            sprite.sprite = null;
-        }
+            if (Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                sprite.sprite = null;
+            }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            sprite.sprite = sprites[0];
-        }
+            if (Input.GetKeyDown(KeyCode.Alpha1))
+            {
+                sprite.sprite = sprites[0];
+            }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            sprite.sprite = sprites[1];
-        }
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                sprite.sprite = sprites[1];
+            }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            sprite.sprite = sprites[2];
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                sprite.sprite = sprites[2];
+            }
         }
     }
 }

@@ -56,7 +56,7 @@ public class Passive : MonoBehaviour
             for (int i = 0; i < passive.requiredPassives.Length; i++)
             {
                 line[i] = Instantiate(lineRenderer, transform).GetComponent<LineRenderer>();
-                line[i].numPositions = 2;
+                line[i].positionCount = 2;
                 linePositions.Add(new Vector3[2]);
             }
         }

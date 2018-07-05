@@ -40,7 +40,7 @@ public class QuestboardController : MonoBehaviour
             questLogId = availableIds[randomId];
             availableIds.RemoveAt(randomId);
 
-            GameObject clone = Instantiate(quest, GameManager.instance.questboard.transform.FindChild("QuestsSpace"));
+            GameObject clone = Instantiate(quest, GameManager.instance.questboard.transform.Find("QuestsSpace"));
             clone.GetComponent<QuestController>().quest = QuestLogController.QL.allQuests[questLogId];
             quests.Add(clone);
         }

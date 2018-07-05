@@ -152,7 +152,7 @@ public class GenerateRooms : MonoBehaviour
                     
                     if (debug)
                     {
-                        Instantiate(test, emptySpaces[k], Quaternion.identity, transform.FindChild("Debug"));
+                        Instantiate(test, emptySpaces[k], Quaternion.identity, transform.Find("Debug"));
                     }
 
                     // If there are no obstacles assigned to the array, break the loop
@@ -168,7 +168,7 @@ public class GenerateRooms : MonoBehaviour
 
                     if (obstacleToSpawn != null && !emptySpacesHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)) && !ignoreFieldsHash.Contains(new Vector2(emptySpaces[k].x, emptySpaces[k].y - 1)))
                     {
-                        Instantiate(obstacleToSpawn, emptySpaces[k], Quaternion.identity, transform.FindChild("Obstacles"));
+                        Instantiate(obstacleToSpawn, emptySpaces[k], Quaternion.identity, transform.Find("Obstacles"));
                         obstacles[obstacleToSpawnID].maxPerLevel--;
                     }
                     
@@ -235,7 +235,7 @@ public class GenerateRooms : MonoBehaviour
                         monsterToSpawn != null
                         )
                     {
-                        GameObject clone = Instantiate(monsterToSpawn, spawnPoints[spawnPointNumber], Quaternion.identity, transform.FindChild("Mobs"));
+                        GameObject clone = Instantiate(monsterToSpawn, spawnPoints[spawnPointNumber], Quaternion.identity, transform.Find("Mobs"));
                         clone.name = monsterToSpawn.name;
 
                         monstersPerRoom -= monsters[monsterToSpawnID].value;
@@ -324,7 +324,7 @@ public class GenerateRooms : MonoBehaviour
                 thisRoom = rooms[x, y].GetComponent<Room>();
                 Vector2 roomPos = new Vector2(x, y) * roomSize;
                 rooms[x, y].GetComponent<Room>().RT = RT;
-                rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.FindChild("Rooms"));                
+                rooms[x, y] = Instantiate(rooms[x, y], roomPos, Quaternion.identity, transform.Find("Rooms"));                
                 rooms[x, y].name = "R[" + x + ", " + y + "]" + " T[" + thisRoom.roomType + "]";
                 thisRoom = rooms[x, y].GetComponent<Room>();
 
@@ -516,13 +516,13 @@ public class GenerateRooms : MonoBehaviour
                     if ((i == -1 || i == size + offset) && j >= -1 && j <= size + offset)
                     {
                         GameObject clone = Instantiate(border);
-                        clone.transform.parent = transform.FindChild("Border");
+                        clone.transform.parent = transform.Find("Border");
                         clone.transform.position = new Vector3(i, j, 0);
                     }
                     else
                     {
                         GameObject clone = Instantiate(borderBg);
-                        clone.transform.parent = transform.FindChild("Border");
+                        clone.transform.parent = transform.Find("Border");
                         clone.transform.position = new Vector3(i, j, 0);
                     }
                 }
@@ -534,13 +534,13 @@ public class GenerateRooms : MonoBehaviour
                         if (j == -1 || j == size + offset)
                         {
                             GameObject clone = Instantiate(border);
-                            clone.transform.parent = transform.FindChild("Border");
+                            clone.transform.parent = transform.Find("Border");
                             clone.transform.position = new Vector3(i, j, 0);
                         }
                         else
                         {
                             GameObject clone = Instantiate(borderBg);
-                            clone.transform.parent = transform.FindChild("Border");
+                            clone.transform.parent = transform.Find("Border");
                             clone.transform.position = new Vector3(i, j, 0);
                         }
                     }

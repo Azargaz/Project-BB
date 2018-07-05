@@ -17,7 +17,7 @@ public class QuestLogController : MonoBehaviour
 
     public static QuestLogController QL;
 
-    void Awake()
+    void Start()
     {
         QL = this;
 
@@ -26,11 +26,11 @@ public class QuestLogController : MonoBehaviour
             allQuests[i].questLogId = i;
         }
 
-        activeQuestsSpace = GameManager.instance.questLog.transform.FindChild("QuestsSpace");
-        questboardQuestsSpace = GameManager.instance.questboard.transform.FindChild("QuestsSpace");
+        activeQuestsSpace = GameManager.instance.questLog.transform.Find("QuestsSpace");
+        questboardQuestsSpace = GameManager.instance.questboard.transform.Find("QuestsSpace");
 
-        questlogCloseButton = activeQuestsSpace.parent.FindChild("Exit").GetComponentInChildren<Button>();
-        questboardCloseButton = questboardQuestsSpace.parent.FindChild("Exit").GetComponentInChildren<Button>();
+        questlogCloseButton = activeQuestsSpace.parent.Find("Exit").GetComponentInChildren<Button>();
+        questboardCloseButton = questboardQuestsSpace.parent.Find("Exit").GetComponentInChildren<Button>();
 
         if(questlogCloseButton != null)
             questlogCloseButton.onClick.AddListener(CloseQuestLog);

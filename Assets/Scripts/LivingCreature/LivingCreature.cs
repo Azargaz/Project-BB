@@ -148,8 +148,8 @@ public abstract class LivingCreature : MonoBehaviour
         Color color = GetComponent<SpriteRenderer>().color;
         SpriteRenderer armorColor = null;
 
-        if (transform.FindChild("Armor") != null)
-            armorColor = transform.FindChild("Armor").GetComponent<SpriteRenderer>();
+        if (transform.Find("Armor") != null)
+            armorColor = transform.Find("Armor").GetComponent<SpriteRenderer>();
 
         if (stats.invincibilityTime > 0)
         {            

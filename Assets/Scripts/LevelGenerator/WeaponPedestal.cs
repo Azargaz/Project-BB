@@ -22,8 +22,8 @@ public class WeaponPedestal : MonoBehaviour
     void Start ()
     {
         WeaponPedestalController.WPC.weaponPedestals.Add(this);
-        promptText = prompt.transform.FindChild("Text").GetComponent<Text>();
-        promptWeaponName = prompt.transform.FindChild("WeaponName").GetComponent<Text>();
+        promptText = prompt.transform.Find("Text").GetComponent<Text>();
+        promptWeaponName = prompt.transform.Find("WeaponName").GetComponent<Text>();
     }
 
     void Update ()

@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        trail = transform.FindChild("Trail");
+        trail = transform.Find("Trail");
         controller = GetComponent<Controller2D>();
         creature = GetComponent<PlayerCreature>();
         stats = creature.stats;
@@ -55,6 +55,9 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.L))
+            mouseChangingDirections = !mouseChangingDirections;
+
         if (stats.pause)
             return;
 
@@ -197,8 +200,8 @@ public class Player : MonoBehaviour
     {
         List<SpriteRenderer> sprites = new List<SpriteRenderer>();
         sprites.Add(GetComponent<SpriteRenderer>());
-        sprites.AddRange(transform.FindChild("Trail").GetComponentsInChildren<SpriteRenderer>());
-        sprites.Add(transform.FindChild("Armor").GetComponent<SpriteRenderer>());
+        sprites.AddRange(transform.Find("Trail").GetComponentsInChildren<SpriteRenderer>());
+        sprites.Add(transform.Find("Armor").GetComponent<SpriteRenderer>());
 
         for (int i = 0; i < sprites.Count; i++)
         {

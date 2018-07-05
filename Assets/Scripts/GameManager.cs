@@ -60,19 +60,19 @@ public class GameManager : MonoBehaviour
 
             if (passiveMenu == null)
             {
-                passiveMenu = staticHUD.transform.FindChild("Passives").gameObject;
+                passiveMenu = staticHUD.transform.Find("Passives").gameObject;
                 passiveMenu.SetActive(false);
             }
 
             if (questLog == null)
             {
-                questLog = staticHUD.transform.FindChild("QuestLog").gameObject;
+                questLog = staticHUD.transform.Find("QuestLog").gameObject;
                 questLog.SetActive(false);
             }
 
             if (questboard == null)
             {
-                questboard = staticHUD.transform.FindChild("Questboard").gameObject;
+                questboard = staticHUD.transform.Find("Questboard").gameObject;
                 questboard.SetActive(false);
             }
         }
@@ -95,19 +95,19 @@ public class GameManager : MonoBehaviour
 
             if (passiveMenu == null)
             {
-                passiveMenu = staticHUD.transform.FindChild("Passives").gameObject;
+                passiveMenu = staticHUD.transform.Find("Passives").gameObject;
                 passiveMenu.SetActive(false);
             }
 
             if (questLog == null)
             {
-                questLog = staticHUD.transform.FindChild("QuestLog").gameObject;
+                questLog = staticHUD.transform.Find("QuestLog").gameObject;
                 questLog.SetActive(false);
             }
 
             if(questboard == null)
             {
-                questboard = staticHUD.transform.FindChild("Questboard").gameObject;
+                questboard = staticHUD.transform.Find("Questboard").gameObject;
                 questboard.SetActive(false);
             }
 
@@ -246,7 +246,7 @@ public class GameManager : MonoBehaviour
 
         QuestLogController.QL.ResetQuests();
 
-        foreach (Transform child in questboard.transform.FindChild("QuestsSpace"))
+        foreach (Transform child in questboard.transform.Find("QuestsSpace"))
         {
             Destroy(child.gameObject);
         }

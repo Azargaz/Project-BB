@@ -163,16 +163,16 @@ public class GroundEnemyAI : EnemyAI
         {
             facing = input > 0 ? 1 : -1;
             
-            if (transform.FindChild("Hitbox") != null)
+            if (transform.Find("Hitbox") != null)
             {
-                Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
+                Vector2 hitboxPos = transform.Find("Hitbox").localPosition;
                 hitboxPos.x = facing * Mathf.Abs(hitboxPos.x);
-                transform.FindChild("Hitbox").localPosition = hitboxPos;
+                transform.Find("Hitbox").localPosition = hitboxPos;
             }
 
-            if(transform.FindChild("Projectile") != null)
+            if(transform.Find("Projectile") != null)
             {
-                transform.FindChild("Projectile").localScale = new Vector3(facing, 1, 1);
+                transform.Find("Projectile").localScale = new Vector3(facing, 1, 1);
             }
 
             GetComponent<SpriteRenderer>().flipX = facing < 0;            

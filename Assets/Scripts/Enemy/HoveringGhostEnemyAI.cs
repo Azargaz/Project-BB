@@ -97,9 +97,9 @@ public class HoveringGhostEnemyAI : EnemyAI
         if (input != 0)
         {
             facing = (int)targetDirection.x;
-            Vector2 hitboxPos = transform.FindChild("Hitbox").localPosition;
+            Vector2 hitboxPos = transform.Find("Hitbox").localPosition;
 
-            if (transform.FindChild("Hitbox") != null)
+            if (transform.Find("Hitbox") != null)
             {
                 if (facing > 0)
                 {
@@ -110,7 +110,7 @@ public class HoveringGhostEnemyAI : EnemyAI
                     hitboxPos.x = -Mathf.Abs(hitboxPos.x);
                 }
 
-                transform.FindChild("Hitbox").localPosition = hitboxPos;
+                transform.Find("Hitbox").localPosition = hitboxPos;
             }
 
         }
